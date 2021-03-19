@@ -1,0 +1,5 @@
+name: AutoReplace
+version: 0.1
+author: Tim Kalkus
+main: com.github.timkalkus.autoreplace.AutoReplaceMain
+api-version: 1.16
