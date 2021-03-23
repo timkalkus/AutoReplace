@@ -16,7 +16,7 @@ public class ReplaceTool {
             try {
                 if (inv_item!= null) {
                     if (isSimilar(inv_item,item) && inv_item.hasItemMeta()){
-                        if (((Damageable) Objects.requireNonNull(inv_item.getItemMeta())).getDamage()<10){
+                        if (((Damageable) inv_item.getItemMeta()).getDamage()<10){
                             possible_replacements.add(inv_item);
                         }
                     }
