@@ -1,21 +1,13 @@
 package com.github.timkalkus.autoreplace;
 
-import org.bukkit.Bukkit;
-import org.bukkit.Material;
-import org.bukkit.block.ShulkerBox;
-import org.bukkit.event.Event;
 import org.bukkit.event.EventHandler;
-import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerItemDamageEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.Damageable;
-
-import com.github.timkalkus.autoreplace.ReplaceTool;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitRunnable;
-import org.bukkit.scheduler.BukkitScheduler;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -31,40 +23,23 @@ public class ToolUsedListener implements Listener{
 
     @EventHandler
     public void itemDamaged(PlayerItemDamageEvent event){
-        BukkitRunnable delayEvent = new DelayEvent(event, event.getItem().clone());
-        delayEvent.runTask(plugin);//runTaskLater(plugin,1L);
-
-
-
-
+        Damageable tool = (Damageable) event.getItem();
+        ItemStack item = event.getItem();
+        markItem(item);
         event.getPlayer().updateInventory();
-        ItemStack[] inventory = event.getPlayer().getInventory().getStorageContents();
-        //event.getPlayer().getInventory().
-        Bukkit.broadcastMessage(String.valueOf(inventory.length));
-        /*
-        for (int i = 0; i < inventory.length; i++){
-            ItemStack item = inventory[i];
-            if (item != null) {
-                if (item.getType().name().contains("SHULKER_BOX")){
-                    Bukkit.broadcastMessage("Shulker_box found at slot " + i);
-                    ShulkerBoxHelper sbh = new ShulkerBoxHelper(item);
-                    sbh.getInventory().addItem(new ItemStack(Material.DIRT,64));
-                    event.getPlayer().getInventory().setItem(i,sbh.getUpdatedShulkerItem());
-                }
-            }*/
-        for (int i = 0; i < inventory.length; i++){
-            ItemStack item = inventory[i];
-            if (item != null) {
-                if (event.getItem().equals(item)) {
-                    Bukkit.broadcastMessage("Identical item found at slot " + i);
-                }
-            }
+        int itemSlot = event.getPlayer().getInventory().first(item);
+        unmarkItem(item);
+        event.getPlayer().updateInventory();
+        if (event.getItem().getType().getMaxDurability()-tool.getDamage()<5) {
+            BukkitRunnable delayEvent = new DelayEvent(event, event.getItem().clone(), itemSlot);
+            delayEvent.runTask(plugin);
         }
     }
 
     public static void markItem(ItemStack item){
         ItemMeta imeta = item.getItemMeta();
         List<String> lore;
+        assert imeta != null;
         if (imeta.hasLore())
             lore = imeta.getLore();
         else
@@ -78,6 +53,7 @@ public class ToolUsedListener implements Listener{
     public static void unmarkItem(ItemStack item){
         ItemMeta imeta = item.getItemMeta();
         List<String> lore;
+        assert imeta != null;
         if (imeta.hasLore())
             lore = imeta.getLore();
         else
@@ -91,21 +67,25 @@ public class ToolUsedListener implements Listener{
     private class DelayEvent extends BukkitRunnable{
         private PlayerItemDamageEvent event;
         private ItemStack item;
+        private int itemSlot;
 
-        public DelayEvent(PlayerItemDamageEvent event, ItemStack item){
+        public DelayEvent(PlayerItemDamageEvent event, ItemStack item, int itemSlot){
             this.event = event;
             this.item = item;
+            this.itemSlot = itemSlot;
         }
 
         @Override
         public void run() {
-            //if (event.getItem().getType().isAir())
-            Damageable tool = (Damageable) event.getItem().getItemMeta();
-            assert tool != null;
-            Bukkit.broadcastMessage(tool.getDamage() + "/" + String.valueOf(event.getItem().getType().getMaxDurability()) + "event");
-            Bukkit.broadcastMessage(((Damageable) item.getItemMeta()).getDamage() + "/" + String.valueOf(event.getItem().getType().getMaxDurability()) + "item");
-            if (event.getItem().getType().getMaxDurability()-tool.getDamage()<10){
-                ReplaceTool.findReplacement(event.getItem(),event.getPlayer());
+            if (event.getItem().getType() != item.getType()){
+                ReplaceTool rt = new ReplaceTool(event.getPlayer(), item, itemSlot);
+                rt.replaceBrokenTool();
+                return;
+            }
+            if (!event.getItem().getEnchantments().isEmpty()) {
+                ReplaceTool rt = new ReplaceTool(event.getPlayer(), item, itemSlot);
+                rt.swapTool();
+                return;
             }
         }
     }
