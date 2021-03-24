@@ -1,5 +1,6 @@
 package com.github.timkalkus.autoreplace;
 
+import org.bukkit.Bukkit;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerItemDamageEvent;
@@ -23,7 +24,12 @@ public class ToolUsedListener implements Listener{
 
     @EventHandler
     public void itemDamaged(PlayerItemDamageEvent event){
-        Damageable tool = (Damageable) event.getItem();
+        if (!event.getItem().hasItemMeta())
+            return;
+        if (!(event.getItem().getItemMeta() instanceof Damageable))
+            return;
+        Bukkit.broadcastMessage("damageable tool found");
+        Damageable tool = (Damageable) event.getItem().getItemMeta();
         ItemStack item = event.getItem();
         markItem(item);
         event.getPlayer().updateInventory();
@@ -31,6 +37,7 @@ public class ToolUsedListener implements Listener{
         unmarkItem(item);
         event.getPlayer().updateInventory();
         if (event.getItem().getType().getMaxDurability()-tool.getDamage()<5) {
+            Bukkit.broadcastMessage("starting delayEvent");
             BukkitRunnable delayEvent = new DelayEvent(event, event.getItem().clone(), itemSlot);
             delayEvent.runTask(plugin);
         }
@@ -77,6 +84,7 @@ public class ToolUsedListener implements Listener{
 
         @Override
         public void run() {
+            Bukkit.broadcastMessage("executing delayEvent");
             if (event.getItem().getType() != item.getType()){
                 ReplaceTool rt = new ReplaceTool(event.getPlayer(), item, itemSlot);
                 rt.replaceBrokenTool();

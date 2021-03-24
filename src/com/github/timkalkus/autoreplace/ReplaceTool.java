@@ -1,11 +1,13 @@
 package com.github.timkalkus.autoreplace;
 
+import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.Sound;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.Damageable;
+import org.bukkit.scheduler.BukkitRunnable;
 
 public class ReplaceTool {
 
@@ -28,7 +30,6 @@ public class ReplaceTool {
     public void replaceBrokenTool() {
         findReplacement();
         if (replacementItemSlot==-1) {
-            saveTool();
             return;
         }
         if (shulkerBox!=null) {
@@ -107,20 +108,36 @@ public class ReplaceTool {
         }
     }
 
-    private boolean isShulker(ItemStack itemStack) {
-        return itemStack.getType().name().contains("SHULKER_BOX");
+    private boolean isShulker(ItemStack item) {
+        if (item!=null)
+            return false;
+        try {
+            return item.getType().name().contains("SHULKER_BOX");
+        }
+        catch(Exception e){
+            e.printStackTrace();
+            return false;
+        }
     }
 
     private boolean isPossibleReplacement(ItemStack item) {
+        if (item!=null)
+            return false;
         // not same item type
-        if (!item.getType().equals(this.item.getType()))
+        try{
+            if (!item.getType().equals(this.item.getType()))
+                return false;
+            // don't replace non-enchanted tools with enchanted ones
+            if (item.getEnchantments().isEmpty() && !this.item.getEnchantments().isEmpty())
+                return false;
+            if (item.getItemMeta() instanceof Damageable)
+                return ((Damageable) item.getItemMeta()).getDamage()*1.0/item.getType().getMaxDurability()<.5;
+            return true;
+        }
+        catch(Exception e){
+            e.printStackTrace();
             return false;
-        // don't replace non-enchanted tools with enchanted ones
-        if (item.getEnchantments().isEmpty() && !this.item.getEnchantments().isEmpty())
-            return false;
-        if (item instanceof Damageable)
-            return ((Damageable) item).getDamage()*1.0/item.getType().getMaxDurability()<.5;
-        return true;
+        }
     }
 
 
