@@ -139,6 +139,4 @@ public class ReplaceTool {
             return false;
         }
     }
-
-
 }

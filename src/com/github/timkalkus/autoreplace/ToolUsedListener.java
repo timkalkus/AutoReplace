@@ -29,6 +29,7 @@ public class ToolUsedListener implements Listener{
         if (!(event.getItem().getItemMeta() instanceof Damageable))
             return;
         Bukkit.broadcastMessage("damageable tool found");
+        ItemStack itemClone = event.getItem().clone();
         Damageable tool = (Damageable) event.getItem().getItemMeta();
         ItemStack item = event.getItem();
         markItem(item);
@@ -38,7 +39,7 @@ public class ToolUsedListener implements Listener{
         event.getPlayer().updateInventory();
         if (event.getItem().getType().getMaxDurability()-tool.getDamage()<5) {
             Bukkit.broadcastMessage("starting delayEvent");
-            BukkitRunnable delayEvent = new DelayEvent(event, event.getItem().clone(), itemSlot);
+            BukkitRunnable delayEvent = new DelayEvent(event, itemClone, itemSlot);
             delayEvent.runTask(plugin);
         }
     }
@@ -85,12 +86,16 @@ public class ToolUsedListener implements Listener{
         @Override
         public void run() {
             Bukkit.broadcastMessage("executing delayEvent");
+            Bukkit.broadcastMessage(event.getItem().getType().name());
+            Bukkit.broadcastMessage(item.getType().name());
             if (event.getItem().getType() != item.getType()){
+                Bukkit.broadcastMessage("ReplaceBrokenTool");
                 ReplaceTool rt = new ReplaceTool(event.getPlayer(), item, itemSlot);
                 rt.replaceBrokenTool();
                 return;
             }
             if (!event.getItem().getEnchantments().isEmpty()) {
+                Bukkit.broadcastMessage("SwapTool");
                 ReplaceTool rt = new ReplaceTool(event.getPlayer(), item, itemSlot);
                 rt.swapTool();
                 return;
