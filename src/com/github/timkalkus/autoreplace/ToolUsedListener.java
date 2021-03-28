@@ -28,7 +28,7 @@ public class ToolUsedListener implements Listener{
             return;
         if (!(event.getItem().getItemMeta() instanceof Damageable))
             return;
-        Bukkit.broadcastMessage("damageable tool found");
+        //Bukkit.broadcastMessage("damageable tool found");
         ItemStack itemClone = event.getItem().clone();
         Damageable tool = (Damageable) event.getItem().getItemMeta();
         ItemStack item = event.getItem();
@@ -38,7 +38,7 @@ public class ToolUsedListener implements Listener{
         unmarkItem(item);
         event.getPlayer().updateInventory();
         if (event.getItem().getType().getMaxDurability()-tool.getDamage()<5) {
-            Bukkit.broadcastMessage("starting delayEvent");
+            //Bukkit.broadcastMessage("starting delayEvent");
             BukkitRunnable delayEvent = new DelayEvent(event, itemClone, itemSlot);
             delayEvent.runTask(plugin);
         }
@@ -85,17 +85,17 @@ public class ToolUsedListener implements Listener{
 
         @Override
         public void run() {
-            Bukkit.broadcastMessage("executing delayEvent");
+            /*Bukkit.broadcastMessage("executing delayEvent");
             Bukkit.broadcastMessage(event.getItem().getType().name());
-            Bukkit.broadcastMessage(item.getType().name());
+            Bukkit.broadcastMessage(item.getType().name());*/
             if (event.getItem().getType() != item.getType()){
-                Bukkit.broadcastMessage("ReplaceBrokenTool");
+                //Bukkit.broadcastMessage("ReplaceBrokenTool");
                 ReplaceTool rt = new ReplaceTool(event.getPlayer(), item, itemSlot);
                 rt.replaceBrokenTool();
                 return;
             }
             if (!event.getItem().getEnchantments().isEmpty()) {
-                Bukkit.broadcastMessage("SwapTool");
+                //Bukkit.broadcastMessage("SwapTool");
                 ReplaceTool rt = new ReplaceTool(event.getPlayer(), item, itemSlot);
                 rt.swapTool();
                 return;

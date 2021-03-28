@@ -121,7 +121,7 @@ public class ReplaceTool {
     }
 
     private boolean isPossibleReplacement(ItemStack item) {
-        if (item!=null)
+        if (item==null)
             return false;
         // not same item type
         try{
