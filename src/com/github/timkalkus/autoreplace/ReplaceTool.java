@@ -36,6 +36,7 @@ public class ReplaceTool {
             player.getInventory().setItem(itemSlot,shulkerBox.getInventory().getItem(replacementItemSlot));
             shulkerBox.getInventory().clear(replacementItemSlot);
             player.getInventory().setItem(shulkerBoxLocation,shulkerBox.getUpdatedShulkerItem());
+            //player.updateInventory();
         }
         else {
             player.getInventory().setItem(itemSlot,player.getInventory().getItem(replacementItemSlot));
@@ -109,7 +110,7 @@ public class ReplaceTool {
     }
 
     private boolean isShulker(ItemStack item) {
-        if (item!=null)
+        if (item==null)
             return false;
         try {
             return item.getType().name().contains("SHULKER_BOX");
