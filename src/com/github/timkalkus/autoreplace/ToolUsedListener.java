@@ -1,6 +1,5 @@
 package com.github.timkalkus.autoreplace;
 
-import org.bukkit.Bukkit;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerItemDamageEvent;
@@ -28,7 +27,6 @@ public class ToolUsedListener implements Listener{
             return;
         if (!(event.getItem().getItemMeta() instanceof Damageable))
             return;
-        //Bukkit.broadcastMessage("damageable tool found");
         ItemStack itemClone = event.getItem().clone();
         Damageable tool = (Damageable) event.getItem().getItemMeta();
         ItemStack item = event.getItem();
@@ -38,7 +36,6 @@ public class ToolUsedListener implements Listener{
         unmarkItem(item);
         event.getPlayer().updateInventory();
         if (event.getItem().getType().getMaxDurability()-tool.getDamage()<5) {
-            //Bukkit.broadcastMessage("starting delayEvent");
             BukkitRunnable delayEvent = new DelayEvent(event, itemClone, itemSlot);
             delayEvent.runTask(plugin);
         }
@@ -51,7 +48,7 @@ public class ToolUsedListener implements Listener{
         if (imeta.hasLore())
             lore = imeta.getLore();
         else
-            lore = new ArrayList<String>();
+            lore = new ArrayList<>();
         assert lore != null;
         lore.add(privateKey);
         imeta.setLore(lore);
@@ -72,10 +69,10 @@ public class ToolUsedListener implements Listener{
         item.setItemMeta(imeta);
     }
 
-    private class DelayEvent extends BukkitRunnable{
-        private PlayerItemDamageEvent event;
-        private ItemStack item;
-        private int itemSlot;
+    private static class DelayEvent extends BukkitRunnable{
+        private final PlayerItemDamageEvent event;
+        private final ItemStack item;
+        private final int itemSlot;
 
         public DelayEvent(PlayerItemDamageEvent event, ItemStack item, int itemSlot){
             this.event = event;
@@ -85,20 +82,14 @@ public class ToolUsedListener implements Listener{
 
         @Override
         public void run() {
-            /*Bukkit.broadcastMessage("executing delayEvent");
-            Bukkit.broadcastMessage(event.getItem().getType().name());
-            Bukkit.broadcastMessage(item.getType().name());*/
             if (event.getItem().getType() != item.getType()){
-                //Bukkit.broadcastMessage("ReplaceBrokenTool");
                 ReplaceTool rt = new ReplaceTool(event.getPlayer(), item, itemSlot);
                 rt.replaceBrokenTool();
                 return;
             }
             if (!event.getItem().getEnchantments().isEmpty()) {
-                //Bukkit.broadcastMessage("SwapTool");
                 ReplaceTool rt = new ReplaceTool(event.getPlayer(), item, itemSlot);
                 rt.swapTool();
-                return;
             }
         }
     }

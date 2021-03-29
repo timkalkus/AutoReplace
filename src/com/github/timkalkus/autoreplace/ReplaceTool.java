@@ -1,13 +1,11 @@
 package com.github.timkalkus.autoreplace;
 
-import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.Sound;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.Damageable;
-import org.bukkit.scheduler.BukkitRunnable;
 
 public class ReplaceTool {
 
@@ -36,7 +34,6 @@ public class ReplaceTool {
             player.getInventory().setItem(itemSlot,shulkerBox.getInventory().getItem(replacementItemSlot));
             shulkerBox.getInventory().clear(replacementItemSlot);
             player.getInventory().setItem(shulkerBoxLocation,shulkerBox.getUpdatedShulkerItem());
-            //player.updateInventory();
         }
         else {
             player.getInventory().setItem(itemSlot,player.getInventory().getItem(replacementItemSlot));
@@ -124,7 +121,6 @@ public class ReplaceTool {
     private boolean isPossibleReplacement(ItemStack item) {
         if (item==null)
             return false;
-        // not same item type
         try{
             if (!item.getType().equals(this.item.getType()))
                 return false;
