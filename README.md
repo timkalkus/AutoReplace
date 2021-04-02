@@ -3,7 +3,7 @@ WIP - Minecraft/Spigot Plugin to auto-replace broken tools and emptied items
 
 A simple plugin with the basic functionality to replace broken items with similar ones. It even swaps enchanted tools shortly before breaking and searches in shulker-boxes for replacement.
 
-Currently programmed for Spigot 1.16.5.
+Currently build for Spigot 1.16+.
 
 TODOs:
 * add permission functionality
