@@ -88,7 +88,7 @@ public class ToolUsedListener implements Listener{
                 return;
             }
             if (!event.getItem().getEnchantments().isEmpty()) {
-                ReplaceTool rt = new ReplaceTool(event.getPlayer(), item, itemSlot);
+                ReplaceTool rt = new ReplaceTool(event.getPlayer(), event.getItem(), itemSlot);
                 rt.swapTool();
             }
         }
