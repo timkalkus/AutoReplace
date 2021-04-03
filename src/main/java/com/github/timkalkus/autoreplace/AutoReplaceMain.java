@@ -5,7 +5,7 @@ public class AutoReplaceMain extends JavaPlugin{
 
     @Override
     public void onEnable(){
-        getServer().getPluginManager().registerEvents(new ToolUsedListener(this), this);
+        getServer().getPluginManager().registerEvents(new AutoReplaceListener(this), this);
     }
 
     @Override

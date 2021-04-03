@@ -64,7 +64,8 @@
                                     <version>${project.version}</version>
                                     <type>${project.packaging}</type>
                                     <overWrite>true</overWrite>
-                                    <outputDirectory>C:/Users/Tim/BuildTools/Testserver/plugins</outputDirectory>
+                                    <outputDirectory>C:/Users/Tim/BuildTools/Testserver/plugins/update</outputDirectory>
+                                    <!--<stripClassifier>true</stripClassifier>-->
                                     <destFileName>AutoReplace.jar</destFileName>
                                 </artifactItem>
                             </artifactItems>
