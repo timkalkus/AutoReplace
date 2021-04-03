@@ -6,7 +6,7 @@
 
     <groupId>com.github.timkalkus</groupId>
     <artifactId>AutoReplace</artifactId>
-    <version>0.1-SNAPSHOT</version>
+    <version>0.1</version>
 
     <repositories>
         <repository>
@@ -64,7 +64,8 @@
                                     <version>${project.version}</version>
                                     <type>${project.packaging}</type>
                                     <overWrite>true</overWrite>
-                                    <outputDirectory>C:/Users/Tim/BuildTools/Testserver/plugins</outputDirectory>
+                                    <outputDirectory>C:/Users/Tim/BuildTools/Testserver/plugins/update</outputDirectory>
+                                    <!--<stripClassifier>true</stripClassifier>-->
                                     <destFileName>AutoReplace.jar</destFileName>
                                 </artifactItem>
                             </artifactItems>

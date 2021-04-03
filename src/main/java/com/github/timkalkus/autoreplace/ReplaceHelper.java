@@ -3,40 +3,57 @@ package com.github.timkalkus.autoreplace;
 import org.bukkit.Material;
 import org.bukkit.Sound;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.Damageable;
 
-public class ReplaceTool {
+public class ReplaceHelper {
 
     private final Player player;
     private final Inventory inventory;
     private final ItemStack item;
-    private final int itemSlot;
+    private final Integer itemSlot;
+    private final EquipmentSlot hand;
 
     private ShulkerBoxHelper shulkerBox = null;
     private int shulkerBoxLocation = -1;
     private int replacementItemSlot = -1;
 
-    public ReplaceTool(Player player, ItemStack item, int itemSlot){
+    public ReplaceHelper(Player player, ItemStack item, int itemSlot){
         this.player = player;
         this.inventory = player.getInventory();
         this.item = item;
         this.itemSlot = itemSlot;
+        this.hand = null;
     }
 
-    public void replaceBrokenTool() {
+    public ReplaceHelper(Player player, ItemStack item, EquipmentSlot hand){
+        this.player = player;
+        this.inventory = player.getInventory();
+        this.item = item;
+        this.itemSlot = null;
+        this.hand = hand;
+    }
+
+    public void replace() {
         findReplacement();
         if (replacementItemSlot==-1) {
             return;
         }
         if (shulkerBox!=null) {
-            player.getInventory().setItem(itemSlot,shulkerBox.getInventory().getItem(replacementItemSlot));
+            if (itemSlot!=null)
+                player.getInventory().setItem(itemSlot,shulkerBox.getInventory().getItem(replacementItemSlot));
+            else
+                player.getInventory().setItem(hand,shulkerBox.getInventory().getItem(replacementItemSlot));
             shulkerBox.getInventory().clear(replacementItemSlot);
             player.getInventory().setItem(shulkerBoxLocation,shulkerBox.getUpdatedShulkerItem());
         }
         else {
-            player.getInventory().setItem(itemSlot,player.getInventory().getItem(replacementItemSlot));
+            if (itemSlot!=null)
+                player.getInventory().setItem(itemSlot,player.getInventory().getItem(replacementItemSlot));
+            else
+                player.getInventory().setItem(hand,player.getInventory().getItem(replacementItemSlot));
             player.getInventory().clear(replacementItemSlot);
         }
         player.updateInventory();
@@ -60,6 +77,7 @@ public class ReplaceTool {
             player.getInventory().setItem(replacementItemSlot,item);
             player.getInventory().setItem(itemSlot,replacementItem);
         }
+        player.playSound(player.getEyeLocation(), Sound.ENTITY_ITEM_BREAK,1.0F,1.0F);
         player.updateInventory();
     }
 
@@ -98,7 +116,7 @@ public class ReplaceTool {
         }
         // then in actual inventory
         for (int i=0;i<invContent.length;i++) {
-            if (i==itemSlot) {continue;}
+            if (itemSlot != null && i==itemSlot) {continue;}
             if (isPossibleReplacement(invContent[i])){
                 this.replacementItemSlot = i;
                 return;
@@ -127,7 +145,7 @@ public class ReplaceTool {
             // don't replace non-enchanted tools with enchanted ones
             if (item.getEnchantments().isEmpty() && !this.item.getEnchantments().isEmpty())
                 return false;
-            if (item.getItemMeta() instanceof Damageable)
+            if (item.hasItemMeta() && item.getItemMeta() instanceof Damageable)
                 return ((Damageable) item.getItemMeta()).getDamage()*1.0/item.getType().getMaxDurability()<.5;
             return true;
         }

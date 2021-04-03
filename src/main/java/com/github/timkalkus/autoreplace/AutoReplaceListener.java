@@ -1,8 +1,11 @@
 package com.github.timkalkus.autoreplace;
 
+import org.bukkit.Bukkit;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
+import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerItemDamageEvent;
+import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.Damageable;
 import org.bukkit.inventory.meta.ItemMeta;
@@ -12,12 +15,12 @@ import org.bukkit.scheduler.BukkitRunnable;
 import java.util.ArrayList;
 import java.util.List;
 
-public class ToolUsedListener implements Listener{
+public class AutoReplaceListener implements Listener{
 
     private final JavaPlugin plugin;
     private static final String privateKey = "AutoReplaceKey";
 
-    public ToolUsedListener(JavaPlugin plugin){
+    public AutoReplaceListener(JavaPlugin plugin){
         this.plugin = plugin;
     }
 
@@ -36,9 +39,22 @@ public class ToolUsedListener implements Listener{
         unmarkItem(item);
         event.getPlayer().updateInventory();
         if (event.getItem().getType().getMaxDurability()-tool.getDamage()<5) {
-            BukkitRunnable delayEvent = new DelayEvent(event, itemClone, itemSlot);
+            BukkitRunnable delayEvent = new ToolDelayEvent(event, itemClone, itemSlot);
             delayEvent.runTask(plugin);
         }
+    }
+
+    @EventHandler
+    public void itemPlaced(PlayerInteractEvent event) {
+        if (!event.hasItem())
+            return; // ignore all event-calls without an item
+        if (event.getItem().getMaxStackSize()==1)
+            return; // ignore when tool, bucket or other non-stackable item
+        if (event.getItem().getAmount()>1)
+            return; // ignore if initital stack size is bigger than 1
+        //Bukkit.broadcastMessage("Hand: " + event.getHand().name() + ", TypeName: " + event.getItem().getType().name() + ", Amount:" + event.getItem().getAmount());
+        BukkitRunnable itemDelayEvent = new ItemDelayEvent(event, event.getItem().clone(), event.getHand());
+        itemDelayEvent.runTask(plugin);
     }
 
     public static void markItem(ItemStack item){
@@ -69,12 +85,35 @@ public class ToolUsedListener implements Listener{
         item.setItemMeta(imeta);
     }
 
-    private static class DelayEvent extends BukkitRunnable{
+    private class ItemDelayEvent extends BukkitRunnable{
+
+        private final PlayerInteractEvent event;
+        private final ItemStack item; // item before
+        private final EquipmentSlot hand;
+
+        private ItemDelayEvent(PlayerInteractEvent event, ItemStack item, EquipmentSlot hand) {
+            this.event = event;
+            this.item = item;
+            this.hand = hand;
+        }
+
+        @Override
+        public void run() {
+            if (event.getItem().getType().equals(item.getType()))
+                return; // (original) stack still there
+            if (!event.getPlayer().getInventory().getItem(hand).getType().isAir())
+                return; // item was replaced by other item than air, e.g. bucket was filled with water
+            ReplaceHelper rt = new ReplaceHelper(event.getPlayer(), item, hand);
+            rt.replace();
+        }
+    }
+
+    private class ToolDelayEvent extends BukkitRunnable{
         private final PlayerItemDamageEvent event;
         private final ItemStack item;
         private final int itemSlot;
 
-        public DelayEvent(PlayerItemDamageEvent event, ItemStack item, int itemSlot){
+        public ToolDelayEvent(PlayerItemDamageEvent event, ItemStack item, int itemSlot){
             this.event = event;
             this.item = item;
             this.itemSlot = itemSlot;
@@ -83,12 +122,12 @@ public class ToolUsedListener implements Listener{
         @Override
         public void run() {
             if (event.getItem().getType() != item.getType()){
-                ReplaceTool rt = new ReplaceTool(event.getPlayer(), item, itemSlot);
-                rt.replaceBrokenTool();
+                ReplaceHelper rt = new ReplaceHelper(event.getPlayer(), item, itemSlot);
+                rt.replace();
                 return;
             }
             if (!event.getItem().getEnchantments().isEmpty()) {
-                ReplaceTool rt = new ReplaceTool(event.getPlayer(), event.getItem(), itemSlot);
+                ReplaceHelper rt = new ReplaceHelper(event.getPlayer(), event.getItem(), itemSlot);
                 rt.swapTool();
             }
         }
