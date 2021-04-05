@@ -72,7 +72,7 @@ public class AutoReplaceCommandManager implements CommandExecutor, TabCompleter 
         if (sender.hasPermission(plugin.arToolAll) || sender.hasPermission(plugin.arItemAll)) {
             resultList.addAll(autocompleteAll(sender, new LinkedList<String>(Arrays.asList(args))));
         }
-        if (sender.hasPermission(plugin.arToolOwn) || sender.hasPermission(plugin.arItemOwn)) {
+        if ((sender.hasPermission(plugin.arToolOwn) || sender.hasPermission(plugin.arItemOwn)) && sender instanceof Player) {
             resultList.addAll(autocompleteOwn(sender, new LinkedList<String>(Arrays.asList(args))));
         }
         return resultList;
