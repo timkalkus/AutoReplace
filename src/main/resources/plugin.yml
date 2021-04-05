@@ -3,3 +3,64 @@ version: ${project.version}
 author: Tim Kalkus
 main: com.github.timkalkus.autoreplace.AutoReplaceMain
 api-version: 1.16
+website: https://www.spigotmc.org/resources/autoreplace.90887/
+commands:
+  autoreplace:
+    permission: autoreplace.command
+    permission-message: Permission denied!
+    description: The command to change autoreplace settings
+    aliases: ar
+    usage: "/<command> [<playerName>|@all] [tool|item] [on|off|default]"
+
+permissions:
+  # general permissions:
+  autoreplace.command:
+    description: allows to issue the basic command
+    default: true
+  autoreplace.reload:
+    description: allows to reload the config
+    default: op
+  # tool permissions:
+  autoreplace.tool.change.*:
+    description: all tool commands
+    default: op
+    children:
+      - autoreplace.tool.change.own true
+      - autoreplace.tool.change.all true
+  autoreplace.tool.change.own:
+    description: change own tool settings
+    default: true
+  autoreplace.tool.change.all:
+    description: change tool settings for @all and other players
+    default: op
+  autoreplace.tool.activated.true:
+    description: flag whether tool replacement is activated by default for group/player
+    default: false
+  autoreplace.tool.activated.false:
+    description: flag whether tool replacement is deactivated by default for group/player
+    default: false
+  autoreplace.tool.forcedefault:
+    description: flag whether default tool setting should forcefully overwrite the players own choice with every join
+    default: false
+  # item permissions:
+  autoreplace.item.change.*:
+    description: all item commands
+    default: op
+    children:
+      - autoreplace.item.change.own true
+      - autoreplace.item.change.all true
+  autoreplace.item.change.own:
+    description: change own item settings
+    default: true
+  autoreplace.item.change.all:
+    description: change item settings for @all and other players
+    default: op
+  autoreplace.item.activated.true:
+    description: flag whether item replacement is activated for group/player
+    default: false
+  autoreplace.item.activated.false:
+    description: flag whether item replacement is deactivated for group/player
+    default: false
+  autoreplace.item.forcedefault:
+    description: flag whether default item setting should forcefully overwrite the players own choice with every join
+    default: false
