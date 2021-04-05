@@ -69,12 +69,11 @@ public class AutoReplaceCommandManager implements CommandExecutor, TabCompleter 
     @Override
     public List<String> onTabComplete(CommandSender sender, Command command, String alias, String[] args) {
         List<String> resultList = new ArrayList<String>();
-        List<String> argsList = new LinkedList<String>(Arrays.asList(args));
         if (sender.hasPermission(plugin.arToolAll) || sender.hasPermission(plugin.arItemAll)) {
-            resultList.addAll(autocompleteAll(sender, argsList));
+            resultList.addAll(autocompleteAll(sender, new LinkedList<String>(Arrays.asList(args))));
         }
         if (sender.hasPermission(plugin.arToolOwn) || sender.hasPermission(plugin.arItemOwn)) {
-            resultList.addAll(autocompleteOwn(sender, argsList));
+            resultList.addAll(autocompleteOwn(sender, new LinkedList<String>(Arrays.asList(args))));
         }
         return resultList;
     }
