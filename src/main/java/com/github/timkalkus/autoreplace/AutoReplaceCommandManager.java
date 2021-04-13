@@ -9,6 +9,7 @@ import org.bukkit.command.TabCompleter;
 import org.bukkit.entity.Player;
 
 import java.util.*;
+import java.util.function.Consumer;
 
 public class AutoReplaceCommandManager implements CommandExecutor, TabCompleter {
     private final AutoReplaceMain plugin;
@@ -22,8 +23,20 @@ public class AutoReplaceCommandManager implements CommandExecutor, TabCompleter 
 
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
-        showUsage(sender,label);
+        if (!executeCommand(sender, command, label, args)) {
+            showUsage(sender, label);
+        }
         return true;
+    }
+
+    private boolean executeCommand(CommandSender sender, Command command, String label, String[] args){
+        if (args.length==0){
+            return false;
+        }
+        switch (args[0]){
+            case "@all": 
+        }
+        return false;
     }
 
     private void showUsage(CommandSender sender, String label){
@@ -160,5 +173,116 @@ public class AutoReplaceCommandManager implements CommandExecutor, TabCompleter 
             result.add(player.getDisplayName());
         }
         return result;
+    }
+
+    protected class commandElement {
+        private List<commandElement> children;
+        private String command;
+        private List<String> permissions;
+        private boolean allPermissionsNeeded;
+        private Consumer<CommandExecuterHelper> targetMethod;
+
+        protected commandElement(String command, List<String> permissions,boolean allPermissionsNeeded, List<commandElement> children){
+            this.command = command;
+            this.children = children;
+            this.permissions = permissions;
+            this.allPermissionsNeeded = allPermissionsNeeded;
+        }
+
+        protected List<String> autoCompleteCommand(CommandSender sender, List<String> args, CommandExecuterHelper commandExecuterHelper){
+            if (args.isEmpty() || !isValid(args.get(0)) || !hasNeededPermissions(sender)){
+                return new ArrayList<String>();
+            }
+            List<String> result = new ArrayList<String>();
+            if (args.size()==1){
+                result.add(command);
+                return result;
+            }
+            args.remove(0);
+            for (commandElement child:children){
+                result.addAll(child.autoCompleteCommand(sender,new ArrayList<String>(args),commandExecuterHelper));
+            }
+            return result;
+        }
+
+        protected boolean hasNeededPermissions(CommandSender sender){
+            if (permissions.isEmpty()){
+                return true;
+            }
+            if (allPermissionsNeeded) {
+                for (String perm : permissions) {
+                    if (!sender.hasPermission(perm)){
+                        return false;
+                    }
+                }
+                return true;
+            } else {
+                for (String perm : permissions) {
+                    if (sender.hasPermission(perm)){
+                        return true;
+                    }
+                }
+                return false;
+            }
+        }
+
+        protected boolean isValid(String input){ //
+            if (command.equals("<player>")){
+                return !Bukkit.matchPlayer(input).isEmpty();
+            }
+            return command.startsWith(input);
+        }
+
+        protected commandElement(){
+            this(null,new ArrayList<String>(),false,new ArrayList<commandElement>());
+        }
+
+        void addChild(commandElement child){
+            children.add(child);
+        }
+
+        void setCommand(String command){
+            this.command=command;
+        }
+
+        void addPermission(String permission){
+            permissions.add(permission);
+        }
+
+        void setAllPermissionsNeeded(boolean allPermissionsNeeded){
+            this.allPermissionsNeeded=allPermissionsNeeded;
+        }
+    }
+
+    private class CommandExecuterHelper { //helper-class to
+        Player player; // player who is executing the command
+        String target; // Playername or @all
+        String toolItem; // tool, item or both
+        String onOffDefault; // on, off, default
+
+        CommandExecuterHelper(Player player, String target, String toolItem, String onOffDefault){
+            this.player = player;
+            this.target = target;
+            this.toolItem = toolItem;
+            this.onOffDefault = onOffDefault;
+        }
+
+        protected void overwrite(CommandExecuterHelper commandExecuterHelper){
+            if (commandExecuterHelper==null){
+                return;
+            }
+            if (commandExecuterHelper.player!=null){
+                player = commandExecuterHelper.player;
+            }
+            if (commandExecuterHelper.target!=null){
+                target = commandExecuterHelper.target;
+            }
+            if (commandExecuterHelper.toolItem!=null){
+                toolItem = commandExecuterHelper.toolItem;
+            }
+            if (commandExecuterHelper.onOffDefault!=null){
+                onOffDefault = commandExecuterHelper.onOffDefault;
+            }
+        }
     }
 }
