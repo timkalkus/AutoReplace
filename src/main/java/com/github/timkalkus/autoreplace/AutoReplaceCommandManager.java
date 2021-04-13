@@ -12,6 +12,7 @@ import java.util.*;
 import java.util.function.Consumer;
 
 public class AutoReplaceCommandManager implements CommandExecutor, TabCompleter {
+    public static final String PLAYER_PLACEHOLDER = "<player>";
     private final AutoReplaceMain plugin;
     private final ChatColor co1 = ChatColor.WHITE;
     private final ChatColor co2 = ChatColor.GREEN;
@@ -181,6 +182,7 @@ public class AutoReplaceCommandManager implements CommandExecutor, TabCompleter 
         private List<String> permissions;
         private boolean allPermissionsNeeded;
         private Consumer<CommandExecuterHelper> targetMethod;
+        private CommandExecuterHelper commandExecuterHelper;
 
         protected commandElement(String command, List<String> permissions,boolean allPermissionsNeeded, List<commandElement> children){
             this.command = command;
@@ -198,14 +200,39 @@ public class AutoReplaceCommandManager implements CommandExecutor, TabCompleter 
                 result.add(command);
                 return result;
             }
-            args.remove(0);
-            for (commandElement child:children){
-                result.addAll(child.autoCompleteCommand(sender,new ArrayList<String>(args),commandExecuterHelper));
+            if (equalsCommand(args.get(0))){
+                args.remove(0);
+                for (commandElement child:children){
+                    result.addAll(child.autoCompleteCommand(sender,new ArrayList<String>(args),commandExecuterHelper));
+                }
             }
             return result;
         }
 
-        protected boolean hasNeededPermissions(CommandSender sender){
+        protected boolean executeCommand(CommandSender sender, List<String> args, CommandExecuterHelper commandExecuterHelper){
+            if (args.isEmpty() || !equalsCommand(args.get(0)) || !hasNeededPermissions(sender)){
+                return false;
+            }
+            if (command.equals(PLAYER_PLACEHOLDER)){
+                commandExecuterHelper.overwrite(new CommandExecuterHelper(null,args.get(0),null,null));
+            } else {
+                commandExecuterHelper.overwrite(this.commandExecuterHelper);
+            }
+
+            if (args.size()==1){
+                targetMethod.accept(commandExecuterHelper);
+                return true;
+            }
+            args.remove(0);
+            for (commandElement child:children){
+                if (child.executeCommand(sender,new ArrayList<String>(args), commandExecuterHelper)){
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        private boolean hasNeededPermissions(CommandSender sender){
             if (permissions.isEmpty()){
                 return true;
             }
@@ -226,11 +253,18 @@ public class AutoReplaceCommandManager implements CommandExecutor, TabCompleter 
             }
         }
 
-        protected boolean isValid(String input){ //
-            if (command.equals("<player>")){
+        private boolean isValid(String input){ //
+            if (command.equals(PLAYER_PLACEHOLDER)){
                 return !Bukkit.matchPlayer(input).isEmpty();
             }
             return command.startsWith(input);
+        }
+
+        private boolean equalsCommand(String input){
+            if (command.equals(PLAYER_PLACEHOLDER)){
+                return Bukkit.getPlayer(input)!=null;
+            }
+            return command.equals(input);
         }
 
         protected commandElement(){
