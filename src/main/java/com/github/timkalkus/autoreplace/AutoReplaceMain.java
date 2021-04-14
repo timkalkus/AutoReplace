@@ -10,6 +10,15 @@ public class AutoReplaceMain extends JavaPlugin{
     private FileConfiguration config;
     private boolean toolEnabledByDefault;
     private boolean itemEnabledByDefault;
+
+    protected static final String PLAYER_PLACEHOLDER = "<player>";
+    protected static final String ALL_PLACEHOLDER = "@all";
+    protected static final String ON = "on";
+    protected static final String OFF = "off";
+    protected static final String DEFAULT = "default";
+    protected static final String TOOL = "tool";
+    protected static final String ITEM = "item";
+
     private final String toolSettingName = "ToolReplacementEnabledByDefault";
     private final String itemSettingName = "ItemReplacementEnabledByDefault";
     protected final String arCommand = "autoreplace.command";

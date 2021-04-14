@@ -11,15 +11,17 @@ import org.bukkit.entity.Player;
 import java.util.*;
 import java.util.function.Consumer;
 
+import static com.github.timkalkus.autoreplace.AutoReplaceMain.*;
+
 public class AutoReplaceCommandManager implements CommandExecutor, TabCompleter {
-    public static final String PLAYER_PLACEHOLDER = "<player>";
-    public static final String ALL_PLACEHOLDER = "@all";
+
+
     private final AutoReplaceMain plugin;
     private final ChatColor co1 = ChatColor.WHITE;
     private final ChatColor co2 = ChatColor.GREEN;
     private final ChatColor co0 = ChatColor.RESET;
-    private List<CommandElement> commandsPlayer;
-    private List<CommandElement> commandsConsole;
+    private final List<CommandElement> commandsPlayer;
+    private final List<CommandElement> commandsConsole;
 
     protected AutoReplaceCommandManager(AutoReplaceMain plugin){
         this.plugin = plugin;
@@ -33,37 +35,38 @@ public class AutoReplaceCommandManager implements CommandExecutor, TabCompleter 
         List<String> otherToolPermission = Arrays.asList(plugin.arToolAll);
         List<String> otherItemPermission = Arrays.asList(plugin.arItemAll);
         // on|off|default for self
-        CommandElement selfOn = new CommandElement("on",selfPermissions,false,null,new CommandExecutorHelper(null,null,null,"on"),this::executeCommandExecutorHelper);
-        CommandElement selfOff = new CommandElement("off",selfPermissions,false,null,new CommandExecutorHelper(null,null,null,"off"),this::executeCommandExecutorHelper);
-        CommandElement selfDefault = new CommandElement("default",selfPermissions,false,null,new CommandExecutorHelper(null,null,null,"default"),this::executeCommandExecutorHelper);
+        CommandElement selfOn = new CommandElement(ON,selfPermissions,false,null,new CommandExecutorHelper(null,null,null,ON),this::executeCommandExecutorHelper);
+        CommandElement selfOff = new CommandElement(OFF,selfPermissions,false,null,new CommandExecutorHelper(null,null,null,OFF),this::executeCommandExecutorHelper);
+        CommandElement selfDefault = new CommandElement(DEFAULT,selfPermissions,false,null,new CommandExecutorHelper(null,null,null,DEFAULT),this::executeCommandExecutorHelper);
         List<CommandElement> selfOnOffDefault = Arrays.asList(selfOn,selfOff,selfDefault);
         // tool|item for self
-        CommandElement selfTool = new CommandElement("tool",selfToolPermission,false,selfOnOffDefault,new CommandExecutorHelper(null,null,"tool",null),this::executeCommandExecutorHelper);
-        CommandElement selfItem = new CommandElement("item",selfItemPermission,false,selfOnOffDefault,new CommandExecutorHelper(null,null,"item",null),this::executeCommandExecutorHelper);
+        CommandElement selfTool = new CommandElement(TOOL,selfToolPermission,false,selfOnOffDefault,new CommandExecutorHelper(null,null,TOOL,null),this::executeCommandExecutorHelper);
+        CommandElement selfItem = new CommandElement(ITEM,selfItemPermission,false,selfOnOffDefault,new CommandExecutorHelper(null,null,ITEM,null),this::executeCommandExecutorHelper);
         // on|off|default for other
-        CommandElement otherOn = new CommandElement("on",otherPermissions,false,null,new CommandExecutorHelper(null,null,null,"on"),this::executeCommandExecutorHelper);
-        CommandElement otherOff = new CommandElement("off",otherPermissions,false,null,new CommandExecutorHelper(null,null,null,"off"),this::executeCommandExecutorHelper);
-        CommandElement otherDefault = new CommandElement("default",otherPermissions,false,null,new CommandExecutorHelper(null,null,null,"default"),this::executeCommandExecutorHelper);
+        CommandElement otherOn = new CommandElement(ON,otherPermissions,false,null,new CommandExecutorHelper(null,null,null,ON),this::executeCommandExecutorHelper);
+        CommandElement otherOff = new CommandElement(OFF,otherPermissions,false,null,new CommandExecutorHelper(null,null,null,OFF),this::executeCommandExecutorHelper);
+        CommandElement otherDefault = new CommandElement(DEFAULT,otherPermissions,false,null,new CommandExecutorHelper(null,null,null,DEFAULT),this::executeCommandExecutorHelper);
         List<CommandElement> otherOnOffDefault = Arrays.asList(otherOn,otherOff,otherDefault);
         List<CommandElement> allOnOff = Arrays.asList(otherOn,otherOff);
         // tool|item for other
-        CommandElement otherTool = new CommandElement("tool",otherToolPermission,false,otherOnOffDefault,new CommandExecutorHelper(null,null,"tool",null),this::executeCommandExecutorHelper);
-        CommandElement otherItem = new CommandElement("item",otherItemPermission,false,otherOnOffDefault,new CommandExecutorHelper(null,null,"item",null),this::executeCommandExecutorHelper);
+        CommandElement otherTool = new CommandElement(TOOL,otherToolPermission,false,otherOnOffDefault,new CommandExecutorHelper(null,null,TOOL,null),this::executeCommandExecutorHelper);
+        CommandElement otherItem = new CommandElement(ITEM,otherItemPermission,false,otherOnOffDefault,new CommandExecutorHelper(null,null,ITEM,null),this::executeCommandExecutorHelper);
         List<CommandElement> otherToolItemOnOffDefault = Arrays.asList(otherTool,otherItem,otherOn,otherOff,otherDefault);
         // player
         CommandElement otherPlayer = new CommandElement(PLAYER_PLACEHOLDER,otherPermissions,false,otherToolItemOnOffDefault,new CommandExecutorHelper(null,PLAYER_PLACEHOLDER,null,null),this::executeCommandExecutorHelper);
         // tool|item for all
-        CommandElement allTool = new CommandElement("tool",otherToolPermission,false,allOnOff,new CommandExecutorHelper(null,null,"tool",null),this::executeCommandExecutorHelper);
-        CommandElement allItem = new CommandElement("item",otherItemPermission,false,allOnOff,new CommandExecutorHelper(null,null,"item",null),this::executeCommandExecutorHelper);
+        CommandElement allTool = new CommandElement(TOOL,otherToolPermission,false,allOnOff,new CommandExecutorHelper(null,null,TOOL,null),this::executeCommandExecutorHelper);
+        CommandElement allItem = new CommandElement(ITEM,otherItemPermission,false,allOnOff,new CommandExecutorHelper(null,null,ITEM,null),this::executeCommandExecutorHelper);
         List<CommandElement> allToolItemOnOff = Arrays.asList(allTool,allItem,otherOn,otherOff);
         // all
         CommandElement allPlayer = new CommandElement(ALL_PLACEHOLDER,otherPermissions,false,allToolItemOnOff,new CommandExecutorHelper(null,ALL_PLACEHOLDER,null,null),this::executeCommandExecutorHelper);
         commandsPlayer = Arrays.asList(selfOn,selfOff,selfDefault,selfTool,selfItem,otherPlayer,allPlayer);
+        commandsConsole = Arrays.asList(otherOn,otherOff,allTool,allItem,otherPlayer,allPlayer);
     }
 
     private void executeCommandExecutorHelper(CommandExecutorHelper ceh){
         Bukkit.broadcastMessage("ceh equals: " + ceh.onOffDefault + ", " + ceh.target + ", " + ceh.toolItem);
-
+        // analyze CommandExecutorHelper and call
     }
 
     @Override
@@ -78,7 +81,7 @@ public class AutoReplaceCommandManager implements CommandExecutor, TabCompleter 
         if (args.length==0){
             return false;
         }
-        for (CommandElement commandElement: commandsPlayer){
+        for (CommandElement commandElement: (sender instanceof Player)?commandsPlayer:commandsConsole){
             if (commandElement.executeCommand(sender,new ArrayList<String>(Arrays.asList(args)),new CommandExecutorHelper(sender,null,null,null))){
                 return true;
             }
@@ -89,7 +92,7 @@ public class AutoReplaceCommandManager implements CommandExecutor, TabCompleter 
     @Override
     public List<String> onTabComplete(CommandSender sender, Command command, String alias, String[] args) {
         List<String> resultList = new ArrayList<String>();
-        for (CommandElement commandElement: commandsPlayer){
+        for (CommandElement commandElement: (sender instanceof Player)?commandsPlayer:commandsConsole){
             resultList.addAll(commandElement.autoCompleteCommand(sender,new ArrayList<String>(Arrays.asList(args))));
         }
         return resultList;
@@ -164,22 +167,22 @@ public class AutoReplaceCommandManager implements CommandExecutor, TabCompleter 
         }
         String currentArgs = args.remove(0);
         if (args.size()==0){
-            List<String> resultList = new ArrayList<String>(getSimilarStrings(Arrays.asList("on", "off"), currentArgs));
+            List<String> resultList = new ArrayList<String>(getSimilarStrings(Arrays.asList(ON, OFF), currentArgs));
             if (tool){
-                resultList.addAll(getSimilarStrings("tool",currentArgs));
+                resultList.addAll(getSimilarStrings(TOOL,currentArgs));
             }
             if (item){
-                resultList.addAll(getSimilarStrings("item",currentArgs));
+                resultList.addAll(getSimilarStrings(ITEM,currentArgs));
             }
             return resultList;
         }
-        if (currentArgs.equals("on")||currentArgs.equals("off")||currentArgs.equals("default")){
+        if (currentArgs.equals(ON)||currentArgs.equals(OFF)||currentArgs.equals(DEFAULT)){
             return Collections.emptyList();
         }
-        if (item && currentArgs.equals("item")){
+        if (item && currentArgs.equals(ITEM)){
             return autocompleteSelection(sender, args, false, false, withDefault);
         }
-        if (tool && currentArgs.equals("tool")){
+        if (tool && currentArgs.equals(TOOL)){
             return autocompleteSelection(sender, args, false, false, withDefault);
         }
         return Collections.emptyList();
