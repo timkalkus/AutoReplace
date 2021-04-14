@@ -13,13 +13,26 @@ import java.util.function.Consumer;
 
 public class AutoReplaceCommandManager implements CommandExecutor, TabCompleter {
     public static final String PLAYER_PLACEHOLDER = "<player>";
+    public static final String ALL_PLACEHOLDER = "@all";
     private final AutoReplaceMain plugin;
     private final ChatColor co1 = ChatColor.WHITE;
     private final ChatColor co2 = ChatColor.GREEN;
     private final ChatColor co0 = ChatColor.RESET;
+    private List<CommandElement> commands;
 
     protected AutoReplaceCommandManager(AutoReplaceMain plugin){
         this.plugin = plugin;
+        // build command tree
+        // ar on|off|default
+        List<String> selfPermissions = Arrays.asList(plugin.arItemOwn,plugin.arToolOwn);
+        List<String> selfToolPermission = Arrays.asList(plugin.arToolOwn);
+        List<String> selfItemPermission = Arrays.asList(plugin.arItemOwn);
+        CommandElement selfOn = new CommandElement("on",selfPermissions,false,null,new CommandExecuterHelper(null,null,null,"on"));
+        CommandElement selfOff = new CommandElement("off",selfPermissions,false,null,new CommandExecuterHelper(null,null,null,"off"));
+        CommandElement selfDefault = new CommandElement("on",selfPermissions,false,null,new CommandExecuterHelper(null,null,null,"default"));
+        List<CommandElement> selfOnOffDefault = Arrays.asList(selfOn,selfOff,selfDefault);
+        CommandElement selfTool = new CommandElement("tool",selfToolPermission,false,selfOnOffDefault,new CommandExecuterHelper(null,null,"tool",null));
+        commands = Arrays.asList(selfOn,selfOff,selfDefault,selfTool);
     }
 
     @Override
@@ -83,11 +96,15 @@ public class AutoReplaceCommandManager implements CommandExecutor, TabCompleter 
     @Override
     public List<String> onTabComplete(CommandSender sender, Command command, String alias, String[] args) {
         List<String> resultList = new ArrayList<String>();
+        /*
         if (sender.hasPermission(plugin.arToolAll) || sender.hasPermission(plugin.arItemAll)) {
             resultList.addAll(autocompleteAll(sender, new LinkedList<String>(Arrays.asList(args))));
         }
         if ((sender.hasPermission(plugin.arToolOwn) || sender.hasPermission(plugin.arItemOwn)) && sender instanceof Player) {
             resultList.addAll(autocompleteOwn(sender, new LinkedList<String>(Arrays.asList(args))));
+        }*/
+        for (CommandElement commandElement:commands){
+            resultList.addAll(commandElement.autoCompleteCommand(sender,Arrays.asList(args)));
         }
         return resultList;
     }
@@ -176,22 +193,30 @@ public class AutoReplaceCommandManager implements CommandExecutor, TabCompleter 
         return result;
     }
 
-    protected class commandElement {
-        private List<commandElement> children;
+    protected class CommandElement {
+        private List<CommandElement> children;
         private String command;
         private List<String> permissions;
         private boolean allPermissionsNeeded;
         private Consumer<CommandExecuterHelper> targetMethod;
         private CommandExecuterHelper commandExecuterHelper;
 
-        protected commandElement(String command, List<String> permissions,boolean allPermissionsNeeded, List<commandElement> children){
+        /**
+         * Initializes a new CommandElement.
+         * @param command defines String of command
+         * @param permissions List of which permissions are necessary
+         * @param allPermissionsNeeded whether you need at least one or all listed permissions
+         * @param children List of follow-up commands
+         */
+        protected CommandElement(String command, List<String> permissions, boolean allPermissionsNeeded, List<CommandElement> children, CommandExecuterHelper commandExecuterHelper){
             this.command = command;
             this.children = children;
             this.permissions = permissions;
             this.allPermissionsNeeded = allPermissionsNeeded;
+            this.commandExecuterHelper = commandExecuterHelper;
         }
 
-        protected List<String> autoCompleteCommand(CommandSender sender, List<String> args, CommandExecuterHelper commandExecuterHelper){
+        protected List<String> autoCompleteCommand(CommandSender sender, List<String> args){
             if (args.isEmpty() || !isValid(args.get(0)) || !hasNeededPermissions(sender)){
                 return new ArrayList<String>();
             }
@@ -202,8 +227,8 @@ public class AutoReplaceCommandManager implements CommandExecutor, TabCompleter 
             }
             if (equalsCommand(args.get(0))){
                 args.remove(0);
-                for (commandElement child:children){
-                    result.addAll(child.autoCompleteCommand(sender,new ArrayList<String>(args),commandExecuterHelper));
+                for (CommandElement child:children){
+                    result.addAll(child.autoCompleteCommand(sender,new ArrayList<String>(args)));
                 }
             }
             return result;
@@ -224,7 +249,7 @@ public class AutoReplaceCommandManager implements CommandExecutor, TabCompleter 
                 return true;
             }
             args.remove(0);
-            for (commandElement child:children){
+            for (CommandElement child:children){
                 if (child.executeCommand(sender,new ArrayList<String>(args), commandExecuterHelper)){
                     return true;
                 }
@@ -267,11 +292,7 @@ public class AutoReplaceCommandManager implements CommandExecutor, TabCompleter 
             return command.equals(input);
         }
 
-        protected commandElement(){
-            this(null,new ArrayList<String>(),false,new ArrayList<commandElement>());
-        }
-
-        void addChild(commandElement child){
+        void addChild(CommandElement child){
             children.add(child);
         }
 
