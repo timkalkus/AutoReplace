@@ -7,6 +7,7 @@ import org.bukkit.plugin.java.JavaPlugin;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 import java.util.UUID;
 import java.util.logging.Logger;
 
@@ -15,8 +16,8 @@ public class AutoReplaceMain extends JavaPlugin{
     private boolean toolEnabledByDefault;
     private boolean itemEnabledByDefault;
 
-    protected Map<UUID,Boolean> playerItemSetting= new HashMap<UUID,Boolean>();
-    protected Map<UUID,Boolean> playerToolSetting= new HashMap<UUID,Boolean>();
+    protected Map<UUID,Boolean> playerItemSetting= new HashMap<>();
+    protected Map<UUID,Boolean> playerToolSetting= new HashMap<>();
 
     protected static final String PLAYER_PLACEHOLDER = "<player>";
     protected static final String ALL_PLACEHOLDER = "all";
@@ -33,7 +34,7 @@ public class AutoReplaceMain extends JavaPlugin{
     private final String toolPlayerMap = "ToolSettingsForPlayers";
     private final String itemPlayerMap = "ItemSettingsForPlayers";
 
-    protected final String arCommand = "autoreplace.command";
+    //protected final String arCommand = "autoreplace.command";
     protected final String arReload = "autoreplace.reload";
     protected final String arSave = "autoreplace.save";
     protected final String arToolOwn = "autoreplace.tool.change.own";
@@ -56,8 +57,8 @@ public class AutoReplaceMain extends JavaPlugin{
         getServer().getPluginManager().registerEvents(new AutoReplaceListener(this), this);
         AutoReplaceCommandManager autoReplaceCommandManager = new AutoReplaceCommandManager(this);
         try {
-            this.getCommand("autoreplace").setExecutor(autoReplaceCommandManager);
-            this.getCommand("autoreplace").setTabCompleter(autoReplaceCommandManager);
+            Objects.requireNonNull(this.getCommand("autoreplace")).setExecutor(autoReplaceCommandManager);
+            Objects.requireNonNull(this.getCommand("autoreplace")).setTabCompleter(autoReplaceCommandManager);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -79,7 +80,7 @@ public class AutoReplaceMain extends JavaPlugin{
     }
 
     private HashMap<String,Boolean> getToolHashMap(){
-        HashMap<String,Boolean> returnMap = new HashMap<String,Boolean>();
+        HashMap<String,Boolean> returnMap = new HashMap<>();
         playerToolSetting.forEach((uuid, bool) -> returnMap.put(uuid.toString(),bool));
         return returnMap;
     }
@@ -91,7 +92,7 @@ public class AutoReplaceMain extends JavaPlugin{
     }
 
     private HashMap<String,Boolean> getItemHashMap(){
-        HashMap<String,Boolean> returnMap = new HashMap<String,Boolean>();
+        HashMap<String,Boolean> returnMap = new HashMap<>();
         playerItemSetting.forEach((uuid, bool) -> returnMap.put(uuid.toString(),bool));
         return returnMap;
     }
@@ -127,8 +128,8 @@ public class AutoReplaceMain extends JavaPlugin{
         config.options().copyDefaults(true);
         toolEnabledByDefault = config.getBoolean(toolSettingName);
         itemEnabledByDefault = config.getBoolean(itemSettingName);
-        setToolHashMap(config.getConfigurationSection(toolPlayerMap).getValues(false));
-        setItemHashMap(config.getConfigurationSection(itemPlayerMap).getValues(false));
+        setToolHashMap(Objects.requireNonNull(config.getConfigurationSection(toolPlayerMap)).getValues(false));
+        setItemHashMap(Objects.requireNonNull(config.getConfigurationSection(itemPlayerMap)).getValues(false));
         if (missingParameters){
             saveConfigFile();
         }

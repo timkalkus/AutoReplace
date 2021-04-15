@@ -1,6 +1,5 @@
 package com.github.timkalkus.autoreplace;
 
-import org.bukkit.Bukkit;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerInteractEvent;
@@ -9,11 +8,11 @@ import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.Damageable;
 import org.bukkit.inventory.meta.ItemMeta;
-import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitRunnable;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 public class AutoReplaceListener implements Listener{
 
@@ -50,7 +49,7 @@ public class AutoReplaceListener implements Listener{
     public void itemPlaced(PlayerInteractEvent event) {
         if (!event.hasItem())
             return; // ignore all event-calls without an item
-        if (event.getItem().getMaxStackSize()==1)
+        if (Objects.requireNonNull(event.getItem()).getMaxStackSize()==1)
             return; // ignore when tool, bucket or other non-stackable item
         if (event.getItem().getAmount()>1)
             return; // ignore if initital stack size is bigger than 1
@@ -103,7 +102,7 @@ public class AutoReplaceListener implements Listener{
 
         @Override
         public void run() {
-            if (event.getItem().getType().equals(item.getType()))
+            if (Objects.requireNonNull(event.getItem()).getType().equals(item.getType()))
                 return; // (original) stack still there
             if (!event.getPlayer().getInventory().getItem(hand).getType().isAir())
                 return; // item was replaced by other item than air, e.g. bucket was filled with water
