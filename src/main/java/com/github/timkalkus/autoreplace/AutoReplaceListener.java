@@ -17,10 +17,10 @@ import java.util.List;
 
 public class AutoReplaceListener implements Listener{
 
-    private final JavaPlugin plugin;
+    private final AutoReplaceMain plugin;
     private static final String privateKey = "AutoReplaceKey";
 
-    public AutoReplaceListener(JavaPlugin plugin){
+    public AutoReplaceListener(AutoReplaceMain plugin){
         this.plugin = plugin;
     }
 
@@ -29,6 +29,8 @@ public class AutoReplaceListener implements Listener{
         if (!event.getItem().hasItemMeta())
             return;
         if (!(event.getItem().getItemMeta() instanceof Damageable))
+            return;
+        if (!plugin.getPlayerToolEnabled(event.getPlayer()))
             return;
         ItemStack itemClone = event.getItem().clone();
         Damageable tool = (Damageable) event.getItem().getItemMeta();
@@ -52,6 +54,8 @@ public class AutoReplaceListener implements Listener{
             return; // ignore when tool, bucket or other non-stackable item
         if (event.getItem().getAmount()>1)
             return; // ignore if initital stack size is bigger than 1
+        if (!plugin.getPlayerItemEnabled(event.getPlayer()))
+            return;
         //Bukkit.broadcastMessage("Hand: " + event.getHand().name() + ", TypeName: " + event.getItem().getType().name() + ", Amount:" + event.getItem().getAmount());
         BukkitRunnable itemDelayEvent = new ItemDelayEvent(event, event.getItem().clone(), event.getHand());
         itemDelayEvent.runTask(plugin);
