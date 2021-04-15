@@ -71,7 +71,7 @@ public class AutoReplaceCommandManager implements CommandExecutor, TabCompleter 
 
     private void executeCommandExecutorHelper(CommandExecutorHelper ceh){
         LOG.fine(ceh.player.getName() + " executed 'autoreplace' command with: " + "target " + ceh.target +
-                ", " + TOOL + "|item " + ceh.toolItem + ", " + ENABLE + "|" + DISABLE + "|" + DEFAULT + "" + ceh.onOffDefault + ", save|reload " + ceh.saveReload);
+                ", " + TOOL + "|" + ITEM + " " + ceh.toolItem + ", " + ENABLE + "|" + DISABLE + "|" + DEFAULT + "" + ceh.onOffDefault + ", save|reload " + ceh.saveReload);
         if (ceh.saveReload!=null){
             if (ceh.saveReload.equals(SAVE)){
                 plugin.saveConfigFile();
@@ -90,7 +90,7 @@ public class AutoReplaceCommandManager implements CommandExecutor, TabCompleter 
             if (ceh.onOffDefault==null){
                 // display current default value
                 if (boolItem){
-                    ceh.player.sendMessage("default item replacement is " + (plugin.getItemEnabledByDefault()?"enabled":"disabled"));
+                    ceh.player.sendMessage("default " + ITEM + " replacement is " + (plugin.getItemEnabledByDefault()?"enabled":"disabled"));
                 }
                 if (boolTool){
                     ceh.player.sendMessage("default " + TOOL + " replacement is " + (plugin.getToolEnabledByDefault()?"enabled":"disabled"));
@@ -114,7 +114,7 @@ public class AutoReplaceCommandManager implements CommandExecutor, TabCompleter 
             if (ceh.onOffDefault==null){
                 // display current default value
                 if (boolItem){
-                    ceh.player.sendMessage("your item replacement is " + (plugin.getPlayerItemEnabled(player)?"enabled":"disabled"));
+                    ceh.player.sendMessage("your " + ITEM + " replacement is " + (plugin.getPlayerItemEnabled(player)?"enabled":"disabled"));
                 }
                 if (boolTool){
                     ceh.player.sendMessage("your " + TOOL + " replacement is " + (plugin.getPlayerToolEnabled(player)?"enabled":"disabled"));
