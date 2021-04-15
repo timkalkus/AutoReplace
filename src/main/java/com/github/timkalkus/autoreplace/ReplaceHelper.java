@@ -143,7 +143,7 @@ public class ReplaceHelper {
             if (!item.getType().equals(this.item.getType()))
                 return false;
             // don't replace non-enchanted tools with enchanted ones
-            if (item.getEnchantments().isEmpty() && !this.item.getEnchantments().isEmpty())
+            if (item.getEnchantments().isEmpty() != this.item.getEnchantments().isEmpty())
                 return false;
             if (item.hasItemMeta() && item.getItemMeta() instanceof Damageable)
                 return ((Damageable) item.getItemMeta()).getDamage()*1.0/item.getType().getMaxDurability()<.5;
