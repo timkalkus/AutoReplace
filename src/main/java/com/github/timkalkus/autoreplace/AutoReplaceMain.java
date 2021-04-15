@@ -19,7 +19,7 @@ public class AutoReplaceMain extends JavaPlugin{
     protected Map<UUID,Boolean> playerToolSetting= new HashMap<UUID,Boolean>();
 
     protected static final String PLAYER_PLACEHOLDER = "<player>";
-    protected static final String ALL_PLACEHOLDER = "@all";
+    protected static final String ALL_PLACEHOLDER = "all";
     protected static final String ENABLE = "enable";
     protected static final String DISABLE = "disable";
     protected static final String DEFAULT = "default";
