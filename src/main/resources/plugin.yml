@@ -20,6 +20,9 @@ permissions:
   autoreplace.reload:
     description: allows to reload the config
     default: op
+  autoreplace.save:
+    description: allows to save current settings to config
+    default: op
   # tool permissions:
   autoreplace.tool.change.*:
     description: all tool commands
@@ -33,10 +36,10 @@ permissions:
   autoreplace.tool.change.all:
     description: change tool settings for @all and other players
     default: op
-  autoreplace.tool.activated.true:
+  autoreplace.tool.default.true:
     description: flag whether tool replacement is activated by default for group/player
     default: false
-  autoreplace.tool.activated.false:
+  autoreplace.tool.default.false:
     description: flag whether tool replacement is deactivated by default for group/player
     default: false
   autoreplace.tool.forcedefault:
@@ -55,10 +58,10 @@ permissions:
   autoreplace.item.change.all:
     description: change item settings for @all and other players
     default: op
-  autoreplace.item.activated.true:
+  autoreplace.item.default.true:
     description: flag whether item replacement is activated for group/player
     default: false
-  autoreplace.item.activated.false:
+  autoreplace.item.default.false:
     description: flag whether item replacement is deactivated for group/player
     default: false
   autoreplace.item.forcedefault:

@@ -28,12 +28,12 @@ public class AutoReplaceCommandManager implements CommandExecutor, TabCompleter 
         // build command tree
         // ar on|off|default
         List<String> selfPermissions = Arrays.asList(plugin.arItemOwn,plugin.arToolOwn);
-        List<String> selfToolPermission = Arrays.asList(plugin.arToolOwn);
-        List<String> selfItemPermission = Arrays.asList(plugin.arItemOwn);
+        List<String> selfToolPermission = Collections.singletonList(plugin.arToolOwn);
+        List<String> selfItemPermission = Collections.singletonList(plugin.arItemOwn);
 
         List<String> otherPermissions = Arrays.asList(plugin.arItemAll,plugin.arToolAll);
-        List<String> otherToolPermission = Arrays.asList(plugin.arToolAll);
-        List<String> otherItemPermission = Arrays.asList(plugin.arItemAll);
+        List<String> otherToolPermission = Collections.singletonList(plugin.arToolAll);
+        List<String> otherItemPermission = Collections.singletonList(plugin.arItemAll);
         // on|off|default for self
         CommandElement selfOn = new CommandElement(ON,selfPermissions,false,null,new CommandExecutorHelper(null,null,null,ON),this::executeCommandExecutorHelper);
         CommandElement selfOff = new CommandElement(OFF,selfPermissions,false,null,new CommandExecutorHelper(null,null,null,OFF),this::executeCommandExecutorHelper);
@@ -66,7 +66,7 @@ public class AutoReplaceCommandManager implements CommandExecutor, TabCompleter 
 
     private void executeCommandExecutorHelper(CommandExecutorHelper ceh){
         Bukkit.broadcastMessage("ceh equals: " + ceh.onOffDefault + ", " + ceh.target + ", " + ceh.toolItem);
-        // analyze CommandExecutorHelper and call
+        // TODO analyze CommandExecutorHelper and call
     }
 
     @Override
@@ -82,7 +82,8 @@ public class AutoReplaceCommandManager implements CommandExecutor, TabCompleter 
             return false;
         }
         for (CommandElement commandElement: (sender instanceof Player)?commandsPlayer:commandsConsole){
-            if (commandElement.executeCommand(sender,new ArrayList<String>(Arrays.asList(args)),new CommandExecutorHelper(sender,null,null,null))){
+            if (commandElement.executeCommand(sender,new ArrayList<String>(Arrays.asList(args)),
+                    new CommandExecutorHelper(sender,null,null,null))){
                 return true;
             }
         }
