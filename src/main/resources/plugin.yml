@@ -10,7 +10,7 @@ commands:
     permission-message: Permission denied!
     description: The command to change autoreplace settings
     aliases: ar
-    usage: "/<command> [<playerName>|@all] [tool|item] [on|off|default]"
+    usage: "/<command> [<playerName>|@all] [tool|item] [enable|disable|default]"
 
 permissions:
   # general permissions:
