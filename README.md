@@ -1,9 +1,10 @@
 # AutoReplace
-Minecraft/Spigot Plugin to auto-replace broken tools and emptied items
+Minecraft/Spigot 1.16+ Plugin to auto-replace broken tools and emptied items
 
-#About the plugin
+# About the plugin
 AutoReplace is a small plugin to enhance the vanilla playing experience by automatically replacing nearly* broken tools and depleted item-stacks. For this it does not only search the inventory itself but also any shulker box contained in the players inventory.
-_*it only saves enchanted tools so that they can be repaired and used again, without an enchantment the tools get replaced when they break_
+
+<sup>_*it only saves enchanted tools so that they can be repaired and used again, without an enchantment the tools get replaced when they break_</sub>
 
 The plugin is currently in a **early development stage**. There are probably bugs, so **use at your own risk!** But in the case you encounter one: I would be very thankful for any bug report :)
 
