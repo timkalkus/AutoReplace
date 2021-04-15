@@ -35,16 +35,16 @@ public class AutoReplaceCommandManager implements CommandExecutor, TabCompleter 
         List<String> otherToolPermission = Collections.singletonList(plugin.arToolAll);
         List<String> otherItemPermission = Collections.singletonList(plugin.arItemAll);
         // on|off|default for self
-        CommandElement selfOn = new CommandElement(ON,selfPermissions,false,null,new CommandExecutorHelper(null,null,null,ON),this::executeCommandExecutorHelper);
-        CommandElement selfOff = new CommandElement(OFF,selfPermissions,false,null,new CommandExecutorHelper(null,null,null,OFF),this::executeCommandExecutorHelper);
+        CommandElement selfOn = new CommandElement(ENABLE,selfPermissions,false,null,new CommandExecutorHelper(null,null,null, ENABLE),this::executeCommandExecutorHelper);
+        CommandElement selfOff = new CommandElement(DISABLE,selfPermissions,false,null,new CommandExecutorHelper(null,null,null, DISABLE),this::executeCommandExecutorHelper);
         CommandElement selfDefault = new CommandElement(DEFAULT,selfPermissions,false,null,new CommandExecutorHelper(null,null,null,DEFAULT),this::executeCommandExecutorHelper);
         List<CommandElement> selfOnOffDefault = Arrays.asList(selfOn,selfOff,selfDefault);
         // tool|item for self
         CommandElement selfTool = new CommandElement(TOOL,selfToolPermission,false,selfOnOffDefault,new CommandExecutorHelper(null,null,TOOL,null),this::executeCommandExecutorHelper);
         CommandElement selfItem = new CommandElement(ITEM,selfItemPermission,false,selfOnOffDefault,new CommandExecutorHelper(null,null,ITEM,null),this::executeCommandExecutorHelper);
         // on|off|default for other
-        CommandElement otherOn = new CommandElement(ON,otherPermissions,false,null,new CommandExecutorHelper(null,null,null,ON),this::executeCommandExecutorHelper);
-        CommandElement otherOff = new CommandElement(OFF,otherPermissions,false,null,new CommandExecutorHelper(null,null,null,OFF),this::executeCommandExecutorHelper);
+        CommandElement otherOn = new CommandElement(ENABLE,otherPermissions,false,null,new CommandExecutorHelper(null,null,null, ENABLE),this::executeCommandExecutorHelper);
+        CommandElement otherOff = new CommandElement(DISABLE,otherPermissions,false,null,new CommandExecutorHelper(null,null,null, DISABLE),this::executeCommandExecutorHelper);
         CommandElement otherDefault = new CommandElement(DEFAULT,otherPermissions,false,null,new CommandExecutorHelper(null,null,null,DEFAULT),this::executeCommandExecutorHelper);
         List<CommandElement> otherOnOffDefault = Arrays.asList(otherOn,otherOff,otherDefault);
         List<CommandElement> allOnOff = Arrays.asList(otherOn,otherOff);
@@ -60,13 +60,117 @@ public class AutoReplaceCommandManager implements CommandExecutor, TabCompleter 
         List<CommandElement> allToolItemOnOff = Arrays.asList(allTool,allItem,otherOn,otherOff);
         // all
         CommandElement allPlayer = new CommandElement(ALL_PLACEHOLDER,otherPermissions,false,allToolItemOnOff,new CommandExecutorHelper(null,ALL_PLACEHOLDER,null,null),this::executeCommandExecutorHelper);
-        commandsPlayer = Arrays.asList(selfOn,selfOff,selfDefault,selfTool,selfItem,otherPlayer,allPlayer);
-        commandsConsole = Arrays.asList(otherOn,otherOff,allTool,allItem,otherPlayer,allPlayer);
+        // save/reload
+        List<String> savePermissions = Collections.singletonList(plugin.arSave);
+        List<String> reloadPermissions = Collections.singletonList(plugin.arReload);
+        CommandElement save = new CommandElement(SAVE,savePermissions,false,null,new CommandExecutorHelper(SAVE),this::executeCommandExecutorHelper);
+        CommandElement reload = new CommandElement(RELOAD,reloadPermissions,false,null,new CommandExecutorHelper(RELOAD),this::executeCommandExecutorHelper);
+        commandsPlayer = Arrays.asList(selfOn,selfOff,selfDefault,selfTool,selfItem,otherPlayer,allPlayer,save,reload);
+        commandsConsole = Arrays.asList(otherOn,otherOff,allTool,allItem,otherPlayer,allPlayer,save,reload);
     }
 
     private void executeCommandExecutorHelper(CommandExecutorHelper ceh){
-        Bukkit.broadcastMessage("ceh equals: " + ceh.onOffDefault + ", " + ceh.target + ", " + ceh.toolItem);
-        // TODO analyze CommandExecutorHelper and call
+        LOG.fine(ceh.player.getName() + " executed 'autoreplace' command with: " + "target " + ceh.target +
+                ", tool|item " + ceh.toolItem + ", on|off|default" + ceh.onOffDefault + ", save|reload " + ceh.saveReload);
+        if (ceh.saveReload!=null){
+            if (ceh.saveReload.equals(SAVE)){
+                plugin.saveConfigFile();
+                return;
+            }
+            if (ceh.saveReload.equals(RELOAD)){
+                plugin.reloadConfigFile();
+                return;
+            }
+        }
+        if (ALL_PLACEHOLDER.equals(ceh.target) || (!(ceh.player instanceof Player) && ceh.target==null)){
+            // @all
+            boolean boolBoth = ceh.toolItem==null;
+            boolean boolItem = (boolBoth || ITEM.equals(ceh.toolItem)) && ceh.player.hasPermission(plugin.arItemAll);
+            boolean boolTool = (boolBoth || TOOL.equals(ceh.toolItem)) && ceh.player.hasPermission(plugin.arToolAll);
+            if (ceh.onOffDefault==null){
+                // display current default value
+                if (boolItem){
+                    ceh.player.sendMessage("default item replacement is " + (plugin.getItemEnabledByDefault()?"enabled":"disabled"));
+                }
+                if (boolTool){
+                    ceh.player.sendMessage("default tool replacement is " + (plugin.getToolEnabledByDefault()?"enabled":"disabled"));
+                }
+            } else {
+                // set current default value
+                if (boolItem){
+                    plugin.setItemEnabledByDefault(ENABLE.equals(ceh.onOffDefault));
+                }
+                if (boolTool){
+                    plugin.setToolEnabledByDefault(ENABLE.equals(ceh.onOffDefault));
+                }
+            }
+            return;
+        } // for the player himself
+        if (ceh.target==null && ceh.player instanceof Player){
+            Player player = (Player) ceh.player;
+            boolean boolBoth = ceh.toolItem==null;
+            boolean boolItem = (boolBoth || ITEM.equals(ceh.toolItem)) && ceh.player.hasPermission(plugin.arItemOwn);
+            boolean boolTool = (boolBoth || TOOL.equals(ceh.toolItem)) && ceh.player.hasPermission(plugin.arToolOwn);
+            if (ceh.onOffDefault==null){
+                // display current default value
+                if (boolItem){
+                    ceh.player.sendMessage("your item replacement is " + (plugin.getPlayerItemEnabled(player)?"enabled":"disabled"));
+                }
+                if (boolTool){
+                    ceh.player.sendMessage("your tool replacement is " + (plugin.getPlayerToolEnabled(player)?"enabled":"disabled"));
+                }
+            } else {
+                // set current default value
+                if (boolItem){
+                    if (ceh.onOffDefault.equals(DEFAULT)) {
+                        plugin.setPlayerItem(player);
+                    } else {
+                        plugin.setPlayerItem(player, ENABLE.equals(ceh.onOffDefault));
+                    }
+                }
+                if (boolTool){
+                    if (ceh.onOffDefault.equals(DEFAULT)) {
+                        plugin.setPlayerTool(player);
+                    } else {
+                        plugin.setPlayerTool(player, ENABLE.equals(ceh.onOffDefault));
+                    }
+                }
+            }
+            return;
+        } // for a specific player
+        Player player = Bukkit.getPlayer(ceh.target);
+        if (player!=null){
+            boolean boolBoth = ceh.toolItem==null;
+            boolean boolItem = (boolBoth || ITEM.equals(ceh.toolItem)) && ceh.player.hasPermission(plugin.arItemAll);
+            boolean boolTool = (boolBoth || TOOL.equals(ceh.toolItem)) && ceh.player.hasPermission(plugin.arToolAll);
+            if (ceh.onOffDefault==null){
+                // display current default value
+                if (boolItem){
+                    ceh.player.sendMessage(player.getDisplayName() + "'s item replacement is " + (plugin.getPlayerItemEnabled(player)?"enabled":"disabled"));
+                }
+                if (boolTool){
+                    ceh.player.sendMessage(player.getDisplayName() + "'s tool replacement is " + (plugin.getPlayerToolEnabled(player)?"enabled":"disabled"));
+                }
+            } else {
+                // set current default value
+                if (boolItem){
+                    if (ceh.onOffDefault.equals(DEFAULT)) {
+                        plugin.setPlayerItem(player);
+                    } else {
+                        plugin.setPlayerItem(player, ENABLE.equals(ceh.onOffDefault));
+                    }
+                }
+                if (boolTool){
+                    if (ceh.onOffDefault.equals(DEFAULT)) {
+                        plugin.setPlayerTool(player);
+                    } else {
+                        plugin.setPlayerTool(player, ENABLE.equals(ceh.onOffDefault));
+                    }
+                }
+            }
+            return;
+        }
+        player.sendMessage("Something went wrong. You shoudn't see this message");
     }
 
     @Override
@@ -129,12 +233,20 @@ public class AutoReplaceCommandManager implements CommandExecutor, TabCompleter 
                 sender.sendMessage(co2+"/" + label + " <playerName> [tool] (on|off|default)"+co0+"\n - "+co1+"sets the tool setting for specified player.");
                 sender.sendMessage(co2+"/" + label + " @all [tool] (on|off)"+co0+"\n - "+co1+"sets tool default setting.");
             }
+            if (sender.hasPermission(plugin.arReload)){
+                sender.sendMessage(co2+"/" + label + " reload"+co0+"\n - "+co1+"load config file.");
+            }
+            if (sender.hasPermission(plugin.arSave)){
+                sender.sendMessage(co2+"/" + label + " save"+co0+"\n - "+co1+"saves current settings to config file.");
+            }
 
         } else { //console or command block
             sender.sendMessage(co2+"/" + label + " <playerName> (on|off|default)"+co0+"\n - "+co1+"sets both tool and item settings at once for specified player.");
             sender.sendMessage(co2+"/" + label + " <playerName> (tool|item) (on|off|default)"+co0+"\n - "+co1+"sets either tool or item setting of specified player.");
             sender.sendMessage(co2+"/" + label + " @all (on|off)"+co0+"\n - "+co1+"sets both tool and item default settings.");
             sender.sendMessage(co2+"/" + label + " @all (tool|item) (on|off)"+co0+"\n - "+co1+"sets either tool or item default setting.");
+            sender.sendMessage(co2+"/" + label + " save"+co0+"\n - "+co1+"saves current settings to config file.");
+            sender.sendMessage(co2+"/" + label + " reload"+co0+"\n - "+co1+"load config file.");
         }
 
     }
@@ -147,13 +259,13 @@ public class AutoReplaceCommandManager implements CommandExecutor, TabCompleter 
         String currentArgs = args.remove(0);
         if (args.size()==0){
             List<String> resultList = new ArrayList<String>();
-            resultList.addAll(getSimilarStrings("@all",currentArgs));
+            resultList.addAll(getSimilarStrings(ALL_PLACEHOLDER,currentArgs));
             resultList.addAll(autocompleteName(currentArgs));
             return resultList;
         }
         boolean tool = sender.hasPermission(plugin.arToolAll);
         boolean item = sender.hasPermission(plugin.arItemAll);
-        if (currentArgs.equals("@all")) {
+        if (currentArgs.equals(ALL_PLACEHOLDER)) {
             return autocompleteSelection(sender, args, tool, item, false);
         }
         if (Bukkit.getPlayer(currentArgs)!=null){
@@ -168,7 +280,7 @@ public class AutoReplaceCommandManager implements CommandExecutor, TabCompleter 
         }
         String currentArgs = args.remove(0);
         if (args.size()==0){
-            List<String> resultList = new ArrayList<String>(getSimilarStrings(Arrays.asList(ON, OFF), currentArgs));
+            List<String> resultList = new ArrayList<String>(getSimilarStrings(Arrays.asList(ENABLE, DISABLE), currentArgs));
             if (tool){
                 resultList.addAll(getSimilarStrings(TOOL,currentArgs));
             }
@@ -177,7 +289,7 @@ public class AutoReplaceCommandManager implements CommandExecutor, TabCompleter 
             }
             return resultList;
         }
-        if (currentArgs.equals(ON)||currentArgs.equals(OFF)||currentArgs.equals(DEFAULT)){
+        if (currentArgs.equals(ENABLE)||currentArgs.equals(DISABLE)||currentArgs.equals(DEFAULT)){
             return Collections.emptyList();
         }
         if (item && currentArgs.equals(ITEM)){
@@ -352,16 +464,21 @@ public class AutoReplaceCommandManager implements CommandExecutor, TabCompleter 
     }
 
     private class CommandExecutorHelper { //helper-class to
-        CommandSender player; // player who is executing the command
-        String target; // Playername or @all
-        String toolItem; // tool, item or both
-        String onOffDefault; // on, off, default
+        CommandSender player = null; // player who is executing the command
+        String target = null; // Playername or @all
+        String toolItem = null; // tool, item or both
+        String onOffDefault = null; // on, off, default
+        String saveReload = null;
 
         CommandExecutorHelper(CommandSender player, String target, String toolItem, String onOffDefault){
             this.player = player;
             this.target = target;
             this.toolItem = toolItem;
             this.onOffDefault = onOffDefault;
+        }
+        CommandExecutorHelper(String saveReload){
+            this.saveReload = saveReload;
+
         }
 
         protected void overwrite(CommandExecutorHelper commandExecutorHelper){
@@ -379,6 +496,9 @@ public class AutoReplaceCommandManager implements CommandExecutor, TabCompleter 
             }
             if (commandExecutorHelper.onOffDefault!=null){
                 onOffDefault = commandExecutorHelper.onOffDefault;
+            }
+            if (commandExecutorHelper.saveReload!=null){
+                saveReload = commandExecutorHelper.saveReload;
             }
         }
     }

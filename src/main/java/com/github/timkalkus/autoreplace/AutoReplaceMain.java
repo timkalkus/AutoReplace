@@ -20,11 +20,13 @@ public class AutoReplaceMain extends JavaPlugin{
 
     protected static final String PLAYER_PLACEHOLDER = "<player>";
     protected static final String ALL_PLACEHOLDER = "@all";
-    protected static final String ON = "on";
-    protected static final String OFF = "off";
+    protected static final String ENABLE = "enable";
+    protected static final String DISABLE = "disable";
     protected static final String DEFAULT = "default";
     protected static final String TOOL = "tool";
     protected static final String ITEM = "item";
+    protected static final String SAVE = "save";
+    protected static final String RELOAD = "reload";
 
     private final String toolSettingName = "ToolReplacementEnabledByDefault";
     private final String itemSettingName = "ItemReplacementEnabledByDefault";
@@ -44,7 +46,7 @@ public class AutoReplaceMain extends JavaPlugin{
     protected final String arItemActivatedTrue = "autoreplace.item.default.true";
     protected final String arItemActivatedFalse = "autoreplace.item.default.false";
     protected final String arItemForce = "autoreplace.item.forcedefault";
-    protected final Logger LOG = Bukkit.getLogger();
+    protected static final Logger LOG = Bukkit.getLogger();
 
 
 
@@ -69,8 +71,10 @@ public class AutoReplaceMain extends JavaPlugin{
     public void saveConfigFile() {
         config.set(toolSettingName,toolEnabledByDefault);
         config.set(itemSettingName,itemEnabledByDefault);
-        setToolHashMap(config.getConfigurationSection(toolPlayerMap).getValues(false));
-        setItemHashMap(config.getConfigurationSection(itemPlayerMap).getValues(false));
+        config.createSection(toolPlayerMap, getToolHashMap());
+        config.createSection(itemPlayerMap, getItemHashMap());
+        //config.set(toolPlayerMap,getToolHashMap());
+        //config.set(itemPlayerMap,getItemHashMap());
         saveConfig();
     }
 
@@ -99,6 +103,8 @@ public class AutoReplaceMain extends JavaPlugin{
     }
 
     public void reloadConfigFile() {
+
+        reloadConfig();
         config = getConfig();
         boolean missingParameters = false;
         if (!config.contains(toolSettingName)){
@@ -119,10 +125,10 @@ public class AutoReplaceMain extends JavaPlugin{
             missingParameters = true;
         }
         config.options().copyDefaults(true);
-        /*toolEnabledByDefault = config.getBoolean(toolSettingName);
+        toolEnabledByDefault = config.getBoolean(toolSettingName);
         itemEnabledByDefault = config.getBoolean(itemSettingName);
         setToolHashMap(config.getConfigurationSection(toolPlayerMap).getValues(false));
-        setItemHashMap(config.getConfigurationSection(itemPlayerMap).getValues(false));*/
+        setItemHashMap(config.getConfigurationSection(itemPlayerMap).getValues(false));
         if (missingParameters){
             saveConfigFile();
         }
