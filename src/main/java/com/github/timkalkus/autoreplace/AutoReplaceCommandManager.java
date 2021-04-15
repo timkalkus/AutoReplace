@@ -71,7 +71,7 @@ public class AutoReplaceCommandManager implements CommandExecutor, TabCompleter 
 
     private void executeCommandExecutorHelper(CommandExecutorHelper ceh){
         LOG.fine(ceh.player.getName() + " executed 'autoreplace' command with: " + "target " + ceh.target +
-                ", tool|item " + ceh.toolItem + ", on|off|default" + ceh.onOffDefault + ", save|reload " + ceh.saveReload);
+                ", tool|item " + ceh.toolItem + ", " + ENABLE + "|" + DISABLE + "|" + DEFAULT + "" + ceh.onOffDefault + ", save|reload " + ceh.saveReload);
         if (ceh.saveReload!=null){
             if (ceh.saveReload.equals(SAVE)){
                 plugin.saveConfigFile();
@@ -209,29 +209,29 @@ public class AutoReplaceCommandManager implements CommandExecutor, TabCompleter 
         if (sender instanceof Player){
             // Different settings for the player itself
             if (sender.hasPermission(plugin.arToolOwn) && sender.hasPermission(plugin.arItemOwn)) {
-                sender.sendMessage(co2+"/" + label + " (on|off|default)"+co0+"\n - "+co1+"sets both your tool and item settings at once.");
-                sender.sendMessage(co2+"/" + label + " (tool|item) (on|off|default)"+co0+"\n - "+co1+"sets either your tool or item setting.");
+                sender.sendMessage(co2+"/" + label + " (" + ENABLE + "|" + DISABLE + "|" + DEFAULT + ")"+co0+"\n - "+co1+"sets both your tool and item settings at once.");
+                sender.sendMessage(co2+"/" + label + " (tool|item) (" + ENABLE + "|" + DISABLE + "|" + DEFAULT + ")"+co0+"\n - "+co1+"sets either your tool or item setting.");
             }//only item.own permission
             if (!sender.hasPermission(plugin.arToolOwn) && sender.hasPermission(plugin.arItemOwn)) {
-                sender.sendMessage(co2+"/" + label + " [item] (on|off|default)"+co0+"\n - "+co1+"sets the item setting.");
+                sender.sendMessage(co2+"/" + label + " [item] (" + ENABLE + "|" + DISABLE + "|" + DEFAULT + ")"+co0+"\n - "+co1+"sets the item setting.");
             }//only tool.own permission
             if (sender.hasPermission(plugin.arToolOwn) && !sender.hasPermission(plugin.arItemOwn)) {
-                sender.sendMessage(co2+"/" + label + " [tool] (on|off|default)"+co0+"\n - "+co1+"sets the tool setting.");
+                sender.sendMessage(co2+"/" + label + " [tool] (" + ENABLE + "|" + DISABLE + "|" + DEFAULT + ")"+co0+"\n - "+co1+"sets the tool setting.");
             }
             // Different settings for the .all permission
             if (sender.hasPermission(plugin.arItemAll) && sender.hasPermission(plugin.arToolAll)){
-                sender.sendMessage(co2+"/" + label + " <playerName> (on|off|default)"+co0+"\n - "+co1+"sets both tool and item settings at once for specified player.");
-                sender.sendMessage(co2+"/" + label + " <playerName> (tool|item) (on|off|default)"+co0+"\n - "+co1+"sets either tool or item setting of specified player.");
-                sender.sendMessage(co2+"/" + label + " @all (on|off)"+co0+"\n - "+co1+"sets both tool and item default settings.");
-                sender.sendMessage(co2+"/" + label + " @all (tool|item) (on|off)"+co0+"\n - "+co1+"sets either tool or item default setting.");
+                sender.sendMessage(co2+"/" + label + " <playerName> (" + ENABLE + "|" + DISABLE + "|" + DEFAULT + ")"+co0+"\n - "+co1+"sets both tool and item settings at once for specified player.");
+                sender.sendMessage(co2+"/" + label + " <playerName> (tool|item) (" + ENABLE + "|" + DISABLE + "|" + DEFAULT + ")"+co0+"\n - "+co1+"sets either tool or item setting of specified player.");
+                sender.sendMessage(co2+"/" + label + " @all (" + ENABLE + "|" + DISABLE + ")"+co0+"\n - "+co1+"sets both tool and item default settings.");
+                sender.sendMessage(co2+"/" + label + " @all (tool|item) (" + ENABLE + "|" + DISABLE + ")"+co0+"\n - "+co1+"sets either tool or item default setting.");
             }// only item.all permission
             if (sender.hasPermission(plugin.arItemAll) && !sender.hasPermission(plugin.arToolAll)){
-                sender.sendMessage(co2+"/" + label + " <playerName> [item] (on|off|default)"+co0+"\n - "+co1+"sets the item setting for specified player.");
-                sender.sendMessage(co2+"/" + label + " @all [item] (on|off)"+co0+"\n - "+co1+"sets item default setting.");
+                sender.sendMessage(co2+"/" + label + " <playerName> [item] (" + ENABLE + "|" + DISABLE + "|" + DEFAULT + ")"+co0+"\n - "+co1+"sets the item setting for specified player.");
+                sender.sendMessage(co2+"/" + label + " @all [item] (" + ENABLE + "|" + DISABLE + ")"+co0+"\n - "+co1+"sets item default setting.");
             }// only tool.all permission
             if (!sender.hasPermission(plugin.arItemAll) && sender.hasPermission(plugin.arToolAll)){
-                sender.sendMessage(co2+"/" + label + " <playerName> [tool] (on|off|default)"+co0+"\n - "+co1+"sets the tool setting for specified player.");
-                sender.sendMessage(co2+"/" + label + " @all [tool] (on|off)"+co0+"\n - "+co1+"sets tool default setting.");
+                sender.sendMessage(co2+"/" + label + " <playerName> [tool] (" + ENABLE + "|" + DISABLE + "|" + DEFAULT + ")"+co0+"\n - "+co1+"sets the tool setting for specified player.");
+                sender.sendMessage(co2+"/" + label + " @all [tool] (" + ENABLE + "|" + DISABLE + ")"+co0+"\n - "+co1+"sets tool default setting.");
             }
             if (sender.hasPermission(plugin.arReload)){
                 sender.sendMessage(co2+"/" + label + " reload"+co0+"\n - "+co1+"load config file.");
@@ -241,10 +241,10 @@ public class AutoReplaceCommandManager implements CommandExecutor, TabCompleter 
             }
 
         } else { //console or command block
-            sender.sendMessage(co2+"/" + label + " <playerName> (on|off|default)"+co0+"\n - "+co1+"sets both tool and item settings at once for specified player.");
-            sender.sendMessage(co2+"/" + label + " <playerName> (tool|item) (on|off|default)"+co0+"\n - "+co1+"sets either tool or item setting of specified player.");
-            sender.sendMessage(co2+"/" + label + " @all (on|off)"+co0+"\n - "+co1+"sets both tool and item default settings.");
-            sender.sendMessage(co2+"/" + label + " @all (tool|item) (on|off)"+co0+"\n - "+co1+"sets either tool or item default setting.");
+            sender.sendMessage(co2+"/" + label + " <playerName> (" + ENABLE + "|" + DISABLE + "|" + DEFAULT + ")"+co0+"\n - "+co1+"sets both tool and item settings at once for specified player.");
+            sender.sendMessage(co2+"/" + label + " <playerName> (tool|item) (" + ENABLE + "|" + DISABLE + "|" + DEFAULT + ")"+co0+"\n - "+co1+"sets either tool or item setting of specified player.");
+            sender.sendMessage(co2+"/" + label + " @all (" + ENABLE + "|" + DISABLE + ")"+co0+"\n - "+co1+"sets both tool and item default settings.");
+            sender.sendMessage(co2+"/" + label + " @all (tool|item) (" + ENABLE + "|" + DISABLE + ")"+co0+"\n - "+co1+"sets either tool or item default setting.");
             sender.sendMessage(co2+"/" + label + " save"+co0+"\n - "+co1+"saves current settings to config file.");
             sender.sendMessage(co2+"/" + label + " reload"+co0+"\n - "+co1+"load config file.");
         }
