@@ -1,10 +1,12 @@
 package com.github.timkalkus.autoreplace;
 
 import org.bukkit.Material;
+import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerItemDamageEvent;
+import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.Damageable;
 import org.bukkit.inventory.meta.ItemMeta;
@@ -54,6 +56,44 @@ public class AutoReplaceListener implements Listener{
         BukkitRunnable itemDelayEvent = new ItemDelayEvent(event, event.getItem().clone(), getItemSlot(event));
         itemDelayEvent.runTask(plugin);
     }
+
+    @EventHandler
+    public void onPlayerJoin(PlayerJoinEvent event)
+    {
+        Player player = event.getPlayer();
+        if(player.hasPermission(plugin.arToolForce)) {
+            forceTool(player);
+        }
+        if(player.hasPermission(plugin.arItemForce)){
+            forceItem(player);
+        }
+    }
+
+    private void forceItem(Player player) {
+        if (player.hasPermission(plugin.arItemActivatedFalse)){
+            plugin.setPlayerItem(player, false);
+            return;
+        }
+        if (player.hasPermission(plugin.arItemActivatedTrue)){
+            plugin.setPlayerItem(player, true);
+            return;
+        }
+        plugin.setPlayerItem(player);
+    }
+
+    private void forceTool(Player player) {
+        if (player.hasPermission(plugin.arToolActivatedFalse)){
+            plugin.setPlayerTool(player, false);
+            return;
+        }
+        if (player.hasPermission(plugin.arToolActivatedTrue)){
+            plugin.setPlayerTool(player, true);
+            return;
+        }
+        plugin.setPlayerTool(player);
+    }
+
+
 
     public static void markItem(ItemStack item){
         ItemMeta imeta = item.getItemMeta();
