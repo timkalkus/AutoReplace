@@ -50,7 +50,6 @@ public class AutoReplaceMain extends JavaPlugin{
     protected static final Logger LOG = Bukkit.getLogger();
 
 
-
     @Override
     public void onEnable() {
         reloadConfigFile();
