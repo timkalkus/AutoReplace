@@ -1,10 +1,10 @@
 package com.github.timkalkus.autoreplace;
 
+import org.bukkit.Material;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerItemDamageEvent;
-import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.Damageable;
 import org.bukkit.inventory.meta.ItemMeta;
@@ -33,12 +33,7 @@ public class AutoReplaceListener implements Listener{
             return;
         ItemStack itemClone = event.getItem().clone();
         Damageable tool = (Damageable) event.getItem().getItemMeta();
-        ItemStack item = event.getItem();
-        markItem(item);
-        event.getPlayer().updateInventory();
-        int itemSlot = event.getPlayer().getInventory().first(item);
-        unmarkItem(item);
-        event.getPlayer().updateInventory();
+        int itemSlot = getItemSlot(event);
         if (event.getItem().getType().getMaxDurability()-tool.getDamage()<5) {
             BukkitRunnable delayEvent = new ToolDelayEvent(event, itemClone, itemSlot);
             delayEvent.runTask(plugin);
@@ -56,7 +51,7 @@ public class AutoReplaceListener implements Listener{
         if (!plugin.getPlayerItemEnabled(event.getPlayer()))
             return;
         //Bukkit.broadcastMessage("Hand: " + event.getHand().name() + ", TypeName: " + event.getItem().getType().name() + ", Amount:" + event.getItem().getAmount());
-        BukkitRunnable itemDelayEvent = new ItemDelayEvent(event, event.getItem().clone(), event.getHand());
+        BukkitRunnable itemDelayEvent = new ItemDelayEvent(event, event.getItem().clone(), getItemSlot(event));
         itemDelayEvent.runTask(plugin);
     }
 
@@ -88,25 +83,53 @@ public class AutoReplaceListener implements Listener{
         item.setItemMeta(imeta);
     }
 
+    private int getItemSlot(PlayerItemDamageEvent event){
+        ItemStack item = event.getItem();
+        markItem(item);
+        event.getPlayer().updateInventory();
+        int itemSlot = event.getPlayer().getInventory().first(item);
+        unmarkItem(item);
+        event.getPlayer().updateInventory();
+        return itemSlot;
+    }
+
+    private int getItemSlot(PlayerInteractEvent event){
+        ItemStack item = event.getItem();
+        markItem(item);
+        event.getPlayer().updateInventory();
+        int itemSlot = event.getPlayer().getInventory().first(item);
+        unmarkItem(item);
+        event.getPlayer().updateInventory();
+        return itemSlot;
+    }
+
+    private boolean isNullOrAir(ItemStack item) {
+        return item==null || isAir(item.getType());
+    }
+
+    private boolean isAir(Material material){
+        return material == Material.AIR || material == Material.CAVE_AIR || material == Material.VOID_AIR;
+    }
+
     private class ItemDelayEvent extends BukkitRunnable{
 
         private final PlayerInteractEvent event;
         private final ItemStack item; // item before
-        private final EquipmentSlot hand;
+        private final int handSlot;
 
-        private ItemDelayEvent(PlayerInteractEvent event, ItemStack item, EquipmentSlot hand) {
+        private ItemDelayEvent(PlayerInteractEvent event, ItemStack item, int handSlot) {
             this.event = event;
             this.item = item;
-            this.hand = hand;
+            this.handSlot = handSlot;
         }
 
         @Override
         public void run() {
             if (Objects.requireNonNull(event.getItem()).getType().equals(item.getType()))
                 return; // (original) stack still there
-            if (!event.getPlayer().getInventory().getItem(hand).getType().isAir())
+            if (!isNullOrAir(event.getPlayer().getInventory().getItem(handSlot)))
                 return; // item was replaced by other item than air, e.g. bucket was filled with water
-            ReplaceHelper rt = new ReplaceHelper(event.getPlayer(), item, hand);
+            ReplaceHelper rt = new ReplaceHelper(event.getPlayer(), item, handSlot);
             rt.replace();
         }
     }

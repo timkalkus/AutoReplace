@@ -3,7 +3,6 @@ package com.github.timkalkus.autoreplace;
 import org.bukkit.Material;
 import org.bukkit.Sound;
 import org.bukkit.entity.Player;
-import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.Damageable;
@@ -14,7 +13,6 @@ public class ReplaceHelper {
     private final Inventory inventory;
     private final ItemStack item;
     private final Integer itemSlot;
-    private final EquipmentSlot hand;
 
     private ShulkerBoxHelper shulkerBox = null;
     private int shulkerBoxLocation = -1;
@@ -25,16 +23,15 @@ public class ReplaceHelper {
         this.inventory = player.getInventory();
         this.item = item;
         this.itemSlot = itemSlot;
-        this.hand = null;
     }
 
-    public ReplaceHelper(Player player, ItemStack item, EquipmentSlot hand){
+    /*public ReplaceHelper(Player player, ItemStack item, int handSlot){
         this.player = player;
         this.inventory = player.getInventory();
         this.item = item;
         this.itemSlot = null;
-        this.hand = hand;
-    }
+        this.handSlot = handSlot;
+    }*/
 
     public void replace() {
         findReplacement();
@@ -42,18 +39,12 @@ public class ReplaceHelper {
             return;
         }
         if (shulkerBox!=null) {
-            if (itemSlot!=null)
-                player.getInventory().setItem(itemSlot,shulkerBox.getInventory().getItem(replacementItemSlot));
-            else
-                player.getInventory().setItem(hand,shulkerBox.getInventory().getItem(replacementItemSlot));
+            player.getInventory().setItem(itemSlot,shulkerBox.getInventory().getItem(replacementItemSlot));
             shulkerBox.getInventory().clear(replacementItemSlot);
             player.getInventory().setItem(shulkerBoxLocation,shulkerBox.getUpdatedShulkerItem());
         }
         else {
-            if (itemSlot!=null)
-                player.getInventory().setItem(itemSlot,player.getInventory().getItem(replacementItemSlot));
-            else
-                player.getInventory().setItem(hand,player.getInventory().getItem(replacementItemSlot));
+            player.getInventory().setItem(itemSlot,player.getInventory().getItem(replacementItemSlot));
             player.getInventory().clear(replacementItemSlot);
         }
         player.updateInventory();

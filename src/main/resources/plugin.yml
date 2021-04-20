@@ -2,7 +2,7 @@ name: AutoReplace
 version: ${project.version}
 author: Tim Kalkus
 main: com.github.timkalkus.autoreplace.AutoReplaceMain
-api-version: 1.16
+api-version: 1.13
 website: https://www.spigotmc.org/resources/autoreplace.90887/
 commands:
   autoreplace:
