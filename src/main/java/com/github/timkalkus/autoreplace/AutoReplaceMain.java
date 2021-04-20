@@ -5,11 +5,13 @@ import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Objects;
-import java.util.UUID;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.URL;
+import java.util.*;
 import java.util.logging.Logger;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class AutoReplaceMain extends JavaPlugin{
     private FileConfiguration config;
@@ -52,6 +54,7 @@ public class AutoReplaceMain extends JavaPlugin{
 
     @Override
     public void onEnable() {
+        checkVersion();
         reloadConfigFile();
         getServer().getPluginManager().registerEvents(new AutoReplaceListener(this), this);
         AutoReplaceCommandManager autoReplaceCommandManager = new AutoReplaceCommandManager(this);
@@ -61,6 +64,78 @@ public class AutoReplaceMain extends JavaPlugin{
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+
+    private void checkVersion(){
+    Bukkit.getScheduler().runTaskAsynchronously(this, () -> {
+            try (InputStream inputStream = new URL("https://api.spigotmc.org/legacy/update.php?resource=" + "90887").openStream(); Scanner scanner = new Scanner(inputStream)) {
+                if (scanner.hasNext()) {
+                    String onlineVersion = scanner.next();
+                    String localVersion = this.getDescription().getVersion();
+                    int versionDifference = compareVersion(localVersion,onlineVersion);
+                    if (versionDifference==0){
+                        LOG.fine("AutoReplace v" + localVersion + " is up to date."); return;
+                    }
+                    if (versionDifference==1){
+                        LOG.warning("AutoReplace v" + localVersion + " is majorly out of date. " +
+                                "Please update to v" + onlineVersion); return;
+                    }
+                    if (versionDifference==2){
+                        LOG.info("AutoReplace v" + localVersion + " is out of date. " +
+                                "Consider upgrading to v" + onlineVersion); return;
+                    }
+                    if (versionDifference>=3){
+                        LOG.info("AutoReplace v" + localVersion + " is slightly out of date. " +
+                                "Consider upgrading to v" + onlineVersion); return;
+                    }
+                    LOG.info("AutoReplace v" + localVersion + " is newer than the latest publicly available version ("
+                            + onlineVersion + "). Unless you are working yourself on a new version this may be an error.");
+                }
+            } catch (IOException exception) {
+                LOG.info("Cannot look for updates: " + exception.getMessage());
+            }
+        });
+    }
+
+    /**
+     * Returns 0 when versions are identical, 1 when first version number is different, 2 when second is different, ...
+     *
+     * Result will be negative, when local version is more recent than onlineVersion. With the same version and a
+     * single snapshot-tag the return value will be (-)1.
+     *
+     * @param localVersion e.g. 0.2.4-snapshot
+     * @param onlineVersion e.g. 0.3.1
+     * @return ..., -2, -1, 0, 1, 2, 3, ...
+     */
+    private int compareVersion(String localVersion, String onlineVersion){
+        String local = extractVersionNumber(localVersion);
+        String online = extractVersionNumber(onlineVersion);
+        int snapshotDiff = (localVersion.equals(local)? 0:1) + (onlineVersion.equals(online)? 0:-1);
+        int[] localArray = Arrays.stream(local.split("\\.")).mapToInt(Integer::parseInt).toArray();
+        int[] onlineArray = Arrays.stream(online.split("\\.")).mapToInt(Integer::parseInt).toArray();
+        int maxLength=Math.max(localArray.length,onlineArray.length);
+        for (int i=0;i<maxLength;i++){
+            if (i>=localArray.length){
+                return i+1;
+            }
+            if (i>=onlineArray.length){
+                return -(i+1);
+            }
+            if (localArray[i]!=onlineArray[i]){
+                return localArray[i]>onlineArray[i]?-(i+1):i+1;
+            }
+        }
+        return snapshotDiff*maxLength;
+    }
+
+    private String extractVersionNumber(String version){
+        Pattern pattern = Pattern.compile("\\d+[.\\d+]+");
+        Matcher matcher = pattern.matcher(version);
+        if (matcher.find())
+        {
+            return matcher.group(0);
+        }
+        return "";
     }
 
     @Override
@@ -73,8 +148,6 @@ public class AutoReplaceMain extends JavaPlugin{
         config.set(itemSettingName,itemEnabledByDefault);
         config.createSection(toolPlayerMap, getToolHashMap());
         config.createSection(itemPlayerMap, getItemHashMap());
-        //config.set(toolPlayerMap,getToolHashMap());
-        //config.set(itemPlayerMap,getItemHashMap());
         saveConfig();
     }
 
