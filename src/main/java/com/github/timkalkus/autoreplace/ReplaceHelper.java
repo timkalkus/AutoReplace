@@ -66,7 +66,7 @@ public class ReplaceHelper {
         else {
             replacementItem = player.getInventory().getItem(replacementItemSlot);
             player.getInventory().setItem(replacementItemSlot,item);
-            player.getInventory().setItem(itemSlot,replacementItem);
+            player.getInventory().setItem(itemSlot,replacementItem); // here nullpoint exception occures for armour slots
         }
         player.playSound(player.getEyeLocation(), Sound.ENTITY_ITEM_BREAK,1.0F,1.0F);
         player.updateInventory();
@@ -78,7 +78,7 @@ public class ReplaceHelper {
             inventory.setItem(saveSlot,item);
             inventory.setItem(itemSlot,new ItemStack(Material.AIR));
         }
-        else {
+        else { // only works for in-hand items
             ItemStack offHand = player.getInventory().getItemInOffHand();
             player.getInventory().setItemInOffHand(inventory.getItem(itemSlot));
             player.getInventory().setItemInMainHand(offHand);

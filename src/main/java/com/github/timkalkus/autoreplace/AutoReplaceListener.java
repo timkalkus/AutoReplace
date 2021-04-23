@@ -127,7 +127,14 @@ public class AutoReplaceListener implements Listener{
         ItemStack item = event.getItem();
         markItem(item);
         event.getPlayer().updateInventory();
-        int itemSlot = event.getPlayer().getInventory().first(item);
+        ItemStack[] inv = event.getPlayer().getInventory().getContents();
+        int itemSlot = -1;
+        for (int i = 0; i<inv.length; i++){
+            if (item.equals(inv[i])){
+                itemSlot = i;
+                break;
+            }
+        }
         unmarkItem(item);
         event.getPlayer().updateInventory();
         return itemSlot;
@@ -137,7 +144,14 @@ public class AutoReplaceListener implements Listener{
         ItemStack item = event.getItem();
         markItem(item);
         event.getPlayer().updateInventory();
-        int itemSlot = event.getPlayer().getInventory().first(item);
+        ItemStack[] inv = event.getPlayer().getInventory().getContents();
+        int itemSlot = -1;
+        for (int i = 0; i<inv.length; i++){
+            if (item.equals(inv[i])){
+                itemSlot = i;
+                break;
+            }
+        }
         unmarkItem(item);
         event.getPlayer().updateInventory();
         return itemSlot;
