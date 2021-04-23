@@ -3,8 +3,11 @@ package com.github.timkalkus.autoreplace;
 import org.bukkit.Bukkit;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
+import org.bukkit.plugin.PluginDescriptionFile;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.bukkit.plugin.java.JavaPluginLoader;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
@@ -51,6 +54,19 @@ public class AutoReplaceMain extends JavaPlugin {
     protected final String arItemForce = "autoreplace.item.forcedefault";
     protected static final Logger LOG = Bukkit.getLogger();
 
+    /**
+     * Constructor for testing purposes
+     */
+    public AutoReplaceMain(JavaPluginLoader loader, PluginDescriptionFile description, File dataFolder, File file) {
+        super(loader, description, dataFolder, file);
+    }
+
+    /**
+     * Constructor for normal plugin functionality
+     */
+    public AutoReplaceMain(){
+        super();
+    }
 
     @Override
     public void onEnable() {

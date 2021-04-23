@@ -66,6 +66,29 @@ public class AutoReplaceListener implements Listener {
         if (player.hasPermission(plugin.arItemForce)) {
             forceItem(player);
         }
+        // testingFunction(event); //TODO remove
+    }
+
+    private void testingFunction(PlayerJoinEvent event) { //TODO remove
+        event.getPlayer().updateInventory();
+        ItemStack[] inv = event.getPlayer().getInventory().getContents();
+        for (int i = 0; i<inv.length; i++){
+            ItemStack item = new ItemStack(Material.STONE);
+            ItemMeta imeta = item.getItemMeta();
+            List<String> lore;
+            assert imeta != null;
+            if (imeta.hasLore())
+                lore = imeta.getLore();
+            else
+                lore = new ArrayList<>();
+            assert lore != null;
+            lore.add("Slot " + i);
+            imeta.setLore(lore);
+            item.setItemMeta(imeta);
+            event.getPlayer().getInventory().setItem(i, item);
+
+        }
+        event.getPlayer().updateInventory();
     }
 
     private void forceItem(Player player) {
