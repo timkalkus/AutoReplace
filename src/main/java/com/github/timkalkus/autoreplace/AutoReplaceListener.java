@@ -16,17 +16,17 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
-public class AutoReplaceListener implements Listener{
+public class AutoReplaceListener implements Listener {
 
     private final AutoReplaceMain plugin;
     private static final String privateKey = "AutoReplaceKey";
 
-    public AutoReplaceListener(AutoReplaceMain plugin){
+    public AutoReplaceListener(AutoReplaceMain plugin) {
         this.plugin = plugin;
     }
 
     @EventHandler
-    public void itemDamaged(PlayerItemDamageEvent event){
+    public void itemDamaged(PlayerItemDamageEvent event) {
         if (!event.getItem().hasItemMeta())
             return;
         if (!(event.getItem().getItemMeta() instanceof Damageable))
@@ -36,7 +36,7 @@ public class AutoReplaceListener implements Listener{
         ItemStack itemClone = event.getItem().clone();
         Damageable tool = (Damageable) event.getItem().getItemMeta();
         int itemSlot = getItemSlot(event);
-        if (event.getItem().getType().getMaxDurability()-tool.getDamage()<5) {
+        if (event.getItem().getType().getMaxDurability() - tool.getDamage() < 5) {
             BukkitRunnable delayEvent = new ToolDelayEvent(event, itemClone, itemSlot);
             delayEvent.runTask(plugin);
         }
@@ -46,9 +46,9 @@ public class AutoReplaceListener implements Listener{
     public void itemPlaced(PlayerInteractEvent event) {
         if (!event.hasItem())
             return; // ignore all event-calls without an item
-        if (Objects.requireNonNull(event.getItem()).getMaxStackSize()==1)
+        if (Objects.requireNonNull(event.getItem()).getMaxStackSize() == 1)
             return; // ignore when tool, bucket or other non-stackable item
-        if (event.getItem().getAmount()>1)
+        if (event.getItem().getAmount() > 1)
             return; // ignore if initital stack size is bigger than 1
         if (!plugin.getPlayerItemEnabled(event.getPlayer()))
             return;
@@ -58,23 +58,22 @@ public class AutoReplaceListener implements Listener{
     }
 
     @EventHandler
-    public void onPlayerJoin(PlayerJoinEvent event)
-    {
+    public void onPlayerJoin(PlayerJoinEvent event) {
         Player player = event.getPlayer();
-        if(player.hasPermission(plugin.arToolForce)) {
+        if (player.hasPermission(plugin.arToolForce)) {
             forceTool(player);
         }
-        if(player.hasPermission(plugin.arItemForce)){
+        if (player.hasPermission(plugin.arItemForce)) {
             forceItem(player);
         }
     }
 
     private void forceItem(Player player) {
-        if (player.hasPermission(plugin.arItemActivatedFalse)){
+        if (player.hasPermission(plugin.arItemActivatedFalse)) {
             plugin.setPlayerItem(player, false);
             return;
         }
-        if (player.hasPermission(plugin.arItemActivatedTrue)){
+        if (player.hasPermission(plugin.arItemActivatedTrue)) {
             plugin.setPlayerItem(player, true);
             return;
         }
@@ -82,11 +81,11 @@ public class AutoReplaceListener implements Listener{
     }
 
     private void forceTool(Player player) {
-        if (player.hasPermission(plugin.arToolActivatedFalse)){
+        if (player.hasPermission(plugin.arToolActivatedFalse)) {
             plugin.setPlayerTool(player, false);
             return;
         }
-        if (player.hasPermission(plugin.arToolActivatedTrue)){
+        if (player.hasPermission(plugin.arToolActivatedTrue)) {
             plugin.setPlayerTool(player, true);
             return;
         }
@@ -94,8 +93,7 @@ public class AutoReplaceListener implements Listener{
     }
 
 
-
-    public static void markItem(ItemStack item){
+    public static void markItem(ItemStack item) {
         ItemMeta imeta = item.getItemMeta();
         List<String> lore;
         assert imeta != null;
@@ -109,7 +107,7 @@ public class AutoReplaceListener implements Listener{
         item.setItemMeta(imeta);
     }
 
-    public static void unmarkItem(ItemStack item){
+    public static void unmarkItem(ItemStack item) {
         ItemMeta imeta = item.getItemMeta();
         List<String> lore;
         assert imeta != null;
@@ -123,14 +121,14 @@ public class AutoReplaceListener implements Listener{
         item.setItemMeta(imeta);
     }
 
-    private int getItemSlot(PlayerItemDamageEvent event){
+    private int getItemSlot(PlayerItemDamageEvent event) {
         ItemStack item = event.getItem();
         markItem(item);
         event.getPlayer().updateInventory();
         ItemStack[] inv = event.getPlayer().getInventory().getContents();
         int itemSlot = -1;
-        for (int i = 0; i<inv.length; i++){
-            if (item.equals(inv[i])){
+        for (int i = 0; i < inv.length; i++) {
+            if (item.equals(inv[i])) {
                 itemSlot = i;
                 break;
             }
@@ -140,14 +138,14 @@ public class AutoReplaceListener implements Listener{
         return itemSlot;
     }
 
-    private int getItemSlot(PlayerInteractEvent event){
+    private int getItemSlot(PlayerInteractEvent event) {
         ItemStack item = event.getItem();
         markItem(item);
         event.getPlayer().updateInventory();
         ItemStack[] inv = event.getPlayer().getInventory().getContents();
         int itemSlot = -1;
-        for (int i = 0; i<inv.length; i++){
-            if (item.equals(inv[i])){
+        for (int i = 0; i < inv.length; i++) {
+            if (item.equals(inv[i])) {
                 itemSlot = i;
                 break;
             }
@@ -157,15 +155,15 @@ public class AutoReplaceListener implements Listener{
         return itemSlot;
     }
 
-    private boolean isNullOrAir(ItemStack item) {
-        return item==null || isAir(item.getType());
+    private static boolean isNullOrAir(ItemStack item) {
+        return item == null || isAir(item.getType());
     }
 
-    private boolean isAir(Material material){
+    private static boolean isAir(Material material) {
         return material == Material.AIR || material == Material.CAVE_AIR || material == Material.VOID_AIR;
     }
 
-    private class ItemDelayEvent extends BukkitRunnable{
+    private static class ItemDelayEvent extends BukkitRunnable {
 
         private final PlayerInteractEvent event;
         private final ItemStack item; // item before
@@ -188,12 +186,12 @@ public class AutoReplaceListener implements Listener{
         }
     }
 
-    private class ToolDelayEvent extends BukkitRunnable{
+    private static class ToolDelayEvent extends BukkitRunnable {
         private final PlayerItemDamageEvent event;
         private final ItemStack item;
         private final int itemSlot;
 
-        public ToolDelayEvent(PlayerItemDamageEvent event, ItemStack item, int itemSlot){
+        public ToolDelayEvent(PlayerItemDamageEvent event, ItemStack item, int itemSlot) {
             this.event = event;
             this.item = item;
             this.itemSlot = itemSlot;
@@ -201,7 +199,7 @@ public class AutoReplaceListener implements Listener{
 
         @Override
         public void run() {
-            if (event.getItem().getType() != item.getType()){
+            if (event.getItem().getType() != item.getType()) {
                 ReplaceHelper rt = new ReplaceHelper(event.getPlayer(), item, itemSlot);
                 rt.replace();
                 return;

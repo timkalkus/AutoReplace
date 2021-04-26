@@ -18,7 +18,7 @@ public class ReplaceHelper {
     private int shulkerBoxLocation = -1;
     private int replacementItemSlot = -1;
 
-    public ReplaceHelper(Player player, ItemStack item, int itemSlot){
+    public ReplaceHelper(Player player, ItemStack item, int itemSlot) {
         this.player = player;
         this.inventory = player.getInventory();
         this.item = item;
@@ -35,16 +35,15 @@ public class ReplaceHelper {
 
     public void replace() {
         findReplacement();
-        if (replacementItemSlot==-1) {
+        if (replacementItemSlot == -1) {
             return;
         }
-        if (shulkerBox!=null) {
-            player.getInventory().setItem(itemSlot,shulkerBox.getInventory().getItem(replacementItemSlot));
+        if (shulkerBox != null) {
+            player.getInventory().setItem(itemSlot, shulkerBox.getInventory().getItem(replacementItemSlot));
             shulkerBox.getInventory().clear(replacementItemSlot);
-            player.getInventory().setItem(shulkerBoxLocation,shulkerBox.getUpdatedShulkerItem());
-        }
-        else {
-            player.getInventory().setItem(itemSlot,player.getInventory().getItem(replacementItemSlot));
+            player.getInventory().setItem(shulkerBoxLocation, shulkerBox.getUpdatedShulkerItem());
+        } else {
+            player.getInventory().setItem(itemSlot, player.getInventory().getItem(replacementItemSlot));
             player.getInventory().clear(replacementItemSlot);
         }
         player.updateInventory();
@@ -52,38 +51,36 @@ public class ReplaceHelper {
 
     public void swapTool() {
         findReplacement();
-        if (replacementItemSlot==-1) {
+        if (replacementItemSlot == -1) {
             saveTool();
             return;
         }
         ItemStack replacementItem;
-        if (shulkerBox!=null) {
+        if (shulkerBox != null) {
             replacementItem = shulkerBox.getInventory().getItem(replacementItemSlot);
-            shulkerBox.getInventory().setItem(replacementItemSlot,item);
-            player.getInventory().setItem(itemSlot,replacementItem);
-            player.getInventory().setItem(shulkerBoxLocation,shulkerBox.getUpdatedShulkerItem());
-        }
-        else {
+            shulkerBox.getInventory().setItem(replacementItemSlot, item);
+            player.getInventory().setItem(itemSlot, replacementItem);
+            player.getInventory().setItem(shulkerBoxLocation, shulkerBox.getUpdatedShulkerItem());
+        } else {
             replacementItem = player.getInventory().getItem(replacementItemSlot);
-            player.getInventory().setItem(replacementItemSlot,item);
-            player.getInventory().setItem(itemSlot,replacementItem); // here nullpoint exception occures for armour slots
+            player.getInventory().setItem(replacementItemSlot, item);
+            player.getInventory().setItem(itemSlot, replacementItem); // here nullpoint exception occures for armour slots
         }
-        player.playSound(player.getEyeLocation(), Sound.ENTITY_ITEM_BREAK,1.0F,1.0F);
+        player.playSound(player.getEyeLocation(), Sound.ENTITY_ITEM_BREAK, 1.0F, 1.0F);
         player.updateInventory();
     }
 
     public void saveTool() {
         int saveSlot = inventory.firstEmpty();
-        if (saveSlot!=-1) {
-            inventory.setItem(saveSlot,item);
-            inventory.setItem(itemSlot,new ItemStack(Material.AIR));
-        }
-        else { // only works for in-hand items
+        if (saveSlot != -1) {
+            inventory.setItem(saveSlot, item);
+            inventory.setItem(itemSlot, new ItemStack(Material.AIR));
+        } else { // only works for in-hand items
             ItemStack offHand = player.getInventory().getItemInOffHand();
             player.getInventory().setItemInOffHand(inventory.getItem(itemSlot));
             player.getInventory().setItemInMainHand(offHand);
         }
-        player.playSound(player.getEyeLocation(), Sound.ENTITY_ITEM_BREAK,1.0F,1.0F);
+        player.playSound(player.getEyeLocation(), Sound.ENTITY_ITEM_BREAK, 1.0F, 1.0F);
         player.updateInventory();
     }
 
@@ -91,11 +88,11 @@ public class ReplaceHelper {
         // Searches inventory for first possible replacement
         ItemStack[] invContent = inventory.getContents();
         // Search first in shulker boxes
-        for (int i=0;i<invContent.length;i++) {
+        for (int i = 0; i < invContent.length; i++) {
             if (isShulker(invContent[i])) {
                 ShulkerBoxHelper sbh = new ShulkerBoxHelper(invContent[i]);
                 ItemStack[] sbContent = sbh.getInventory().getContents();
-                for (int j=0;j<sbContent.length;j++) {
+                for (int j = 0; j < sbContent.length; j++) {
                     if (isPossibleReplacement(sbContent[j])) {
                         this.shulkerBox = sbh;
                         this.shulkerBoxLocation = i;
@@ -106,9 +103,11 @@ public class ReplaceHelper {
             }
         }
         // then in actual inventory
-        for (int i=0;i<invContent.length;i++) {
-            if (itemSlot != null && i==itemSlot) {continue;}
-            if (isPossibleReplacement(invContent[i])){
+        for (int i = 0; i < invContent.length; i++) {
+            if (itemSlot != null && i == itemSlot) {
+                continue;
+            }
+            if (isPossibleReplacement(invContent[i])) {
                 this.replacementItemSlot = i;
                 return;
             }
@@ -116,31 +115,29 @@ public class ReplaceHelper {
     }
 
     private boolean isShulker(ItemStack item) {
-        if (item==null)
+        if (item == null)
             return false;
         try {
             return item.getType().name().contains("SHULKER_BOX");
-        }
-        catch(Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
             return false;
         }
     }
 
     private boolean isPossibleReplacement(ItemStack item) {
-        if (item==null)
+        if (item == null)
             return false;
-        try{
+        try {
             if (!item.getType().equals(this.item.getType()))
                 return false;
             // don't replace non-enchanted tools with enchanted ones
             if (item.getEnchantments().isEmpty() != this.item.getEnchantments().isEmpty())
                 return false;
             if (item.hasItemMeta() && item.getItemMeta() instanceof Damageable)
-                return ((Damageable) item.getItemMeta()).getDamage()*1.0/item.getType().getMaxDurability()<.5;
+                return ((Damageable) item.getItemMeta()).getDamage() * 1.0 / item.getType().getMaxDurability() < .5;
             return true;
-        }
-        catch(Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
             return false;
         }
