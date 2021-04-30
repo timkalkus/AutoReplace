@@ -57,7 +57,7 @@ public class AutoReplaceMain extends JavaPlugin {
     /**
      * Constructor for testing purposes
      */
-    public AutoReplaceMain(JavaPluginLoader loader, PluginDescriptionFile description, File dataFolder, File file) {
+    protected AutoReplaceMain(JavaPluginLoader loader, PluginDescriptionFile description, File dataFolder, File file) {
         super(loader, description, dataFolder, file);
     }
 
