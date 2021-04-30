@@ -1,6 +1,5 @@
 package com.github.timkalkus.autoreplace;
 
-import org.bukkit.Material;
 import org.bukkit.Sound;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
@@ -74,7 +73,7 @@ public class ReplaceHelper {
         int saveSlot = inventory.firstEmpty();
         if (saveSlot != -1) {
             inventory.setItem(saveSlot, item);
-            inventory.setItem(itemSlot, new ItemStack(Material.AIR));
+            inventory.setItem(itemSlot, null);
         } else { // only works for in-hand items
             ItemStack offHand = player.getInventory().getItemInOffHand();
             player.getInventory().setItemInOffHand(inventory.getItem(itemSlot));
@@ -134,7 +133,7 @@ public class ReplaceHelper {
             // don't replace non-enchanted tools with enchanted ones
             if (item.getEnchantments().isEmpty() != this.item.getEnchantments().isEmpty())
                 return false;
-            if (item.hasItemMeta() && item.getItemMeta() instanceof Damageable)
+            if (item.hasItemMeta() && item.getItemMeta() instanceof Damageable && item.getType().getMaxDurability() != 0)
                 return ((Damageable) item.getItemMeta()).getDamage() * 1.0 / item.getType().getMaxDurability() < .5;
             return true;
         } catch (Exception e) {

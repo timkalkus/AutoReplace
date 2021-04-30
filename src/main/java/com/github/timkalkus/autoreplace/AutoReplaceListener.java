@@ -36,7 +36,7 @@ public class AutoReplaceListener implements Listener {
         ItemStack itemClone = event.getItem().clone();
         Damageable tool = (Damageable) event.getItem().getItemMeta();
         int itemSlot = getItemSlot(event);
-        if (event.getItem().getType().getMaxDurability() - tool.getDamage() < 5) {
+        if (event.getItem().getType().getMaxDurability() - tool.getDamage() <= 5) {
             BukkitRunnable delayEvent = new ToolDelayEvent(event, itemClone, itemSlot);
             delayEvent.runTask(plugin);
         }
@@ -178,7 +178,7 @@ public class AutoReplaceListener implements Listener {
         return itemSlot;
     }
 
-    private static boolean isNullOrAir(ItemStack item) {
+    protected static boolean isNullOrAir(ItemStack item) {
         return item == null || isAir(item.getType());
     }
 

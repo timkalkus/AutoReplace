@@ -13,10 +13,6 @@
             <id>spigot-repo</id>
             <url>https://hub.spigotmc.org/nexus/content/repositories/snapshots/</url>
         </repository>
-        <!--repository>
-            <id>spigot-repo-public</id>
-            <url>https://hub.spigotmc.org/nexus/content/repositories/public</url>
-        </repository>-->
         <repository>
             <id>maven-repo</id>
             <url>https://repo.maven.apache.org/maven2</url>
@@ -30,36 +26,24 @@
             <version>1.16.1-R0.1-SNAPSHOT</version>
             <scope>provided</scope>
         </dependency>
-        <dependency>
+        <dependency><!-- ### this is a custom local build ### -->
             <groupId>com.github.seeseemelk</groupId>
             <artifactId>MockBukkit-v1.16</artifactId>
             <version>0.34.1</version>
             <scope>test</scope>
         </dependency>
-        <!--dependency>
-            <groupId>com.github.seeseemelk</groupId>
-            <artifactId>MockBukkit-v1.13-spigot</artifactId>
-            <version>0.2.0</version>
+        <dependency>
+            <groupId>com.diogonunes</groupId>
+            <artifactId>JColor</artifactId>
+            <version>5.0.1</version>
             <scope>test</scope>
         </dependency>
-        <dependency>
-            <groupId>com.github.seeseemelk</groupId>
-            <artifactId>MockBukkit-v1.13-spigot</artifactId>
-            <version>0.2.0</version>
-            <scope>test</scope>
-        </dependency>-->
         <dependency>
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter-engine</artifactId>
             <version>5.7.1</version>
             <scope>test</scope>
         </dependency>
-        <!--dependency>
-            <groupId>com.github.seeseemelk</groupId>
-            <artifactId>MockBukkit-v1.13</artifactId>
-            <version>0.2.0</version>
-            <scope>test</scope>
-        </dependency>-->
         <dependency>
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter-api</artifactId>
