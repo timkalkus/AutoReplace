@@ -24,13 +24,6 @@ public class ReplaceHelper {
         this.itemSlot = itemSlot;
     }
 
-    /*public ReplaceHelper(Player player, ItemStack item, int handSlot){
-        this.player = player;
-        this.inventory = player.getInventory();
-        this.item = item;
-        this.itemSlot = null;
-        this.handSlot = handSlot;
-    }*/
 
     public void replace() {
         findReplacement();

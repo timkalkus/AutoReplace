@@ -6,6 +6,7 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.BlockStateMeta;
 
+@SuppressWarnings("unused")
 public class ShulkerBoxHelper {
     private ItemStack shulker;
     private BlockStateMeta bsm;

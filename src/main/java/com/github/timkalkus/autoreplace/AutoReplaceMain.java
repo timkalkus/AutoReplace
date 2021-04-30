@@ -64,7 +64,7 @@ public class AutoReplaceMain extends JavaPlugin {
     /**
      * Constructor for normal plugin functionality
      */
-    public AutoReplaceMain(){
+    public AutoReplaceMain() {
         super();
     }
 

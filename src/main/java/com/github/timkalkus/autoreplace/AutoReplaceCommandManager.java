@@ -7,6 +7,7 @@ import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabCompleter;
 import org.bukkit.entity.Player;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -175,7 +176,7 @@ public class AutoReplaceCommandManager implements CommandExecutor, TabCompleter 
     }
 
     @Override
-    public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
+    public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, String[] args) {
         if (!executeCommand(sender, args)) {
             showUsage(sender, label);
         }
@@ -196,7 +197,7 @@ public class AutoReplaceCommandManager implements CommandExecutor, TabCompleter 
     }
 
     @Override
-    public List<String> onTabComplete(CommandSender sender, Command command, String alias, String[] args) {
+    public List<String> onTabComplete(@NotNull CommandSender sender, @NotNull Command command, @NotNull String alias, String[] args) {
         List<String> resultList = new ArrayList<>();
         for (CommandElement commandElement : (sender instanceof Player) ? commandsPlayer : commandsConsole) {
             resultList.addAll(commandElement.autoCompleteCommand(sender, new ArrayList<>(Arrays.asList(args))));
@@ -253,7 +254,7 @@ public class AutoReplaceCommandManager implements CommandExecutor, TabCompleter 
     }
 
 
-    protected class CommandElement {
+    protected static class CommandElement {
         private final List<CommandElement> children;
         private final String command;
         private final List<String> permissions;
@@ -271,6 +272,7 @@ public class AutoReplaceCommandManager implements CommandExecutor, TabCompleter 
          * @param commandExecutorHelper helper-object to write command information into
          * @param targetMethod          method to execute
          */
+        @SuppressWarnings("SameParameterValue")
         protected CommandElement(String command, List<String> permissions, boolean allPermissionsNeeded, List<CommandElement> children, CommandExecutorHelper commandExecutorHelper, Consumer<CommandExecutorHelper> targetMethod) {
             this.command = command;
             this.children = children;
@@ -366,7 +368,7 @@ public class AutoReplaceCommandManager implements CommandExecutor, TabCompleter 
         }
     }
 
-    private class CommandExecutorHelper { //helper-class to
+    private static class CommandExecutorHelper { //helper-class to
         CommandSender player = null; // player who is executing the command
         String target = null; // PlayerName or @all
         String toolItem = null; // tool, item or both
