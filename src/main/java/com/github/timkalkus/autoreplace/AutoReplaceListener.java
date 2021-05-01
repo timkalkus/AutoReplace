@@ -205,7 +205,9 @@ public class AutoReplaceListener implements Listener {
                 rt.replace();
                 return;
             }
-            if (!event.getItem().getEnchantments().isEmpty()) {
+            // item has enchantment and is no elytra or is elytra with 1 durability left
+            if (!event.getItem().getEnchantments().isEmpty() && !event.getItem().getType().equals(Material.ELYTRA) ||
+                    event.getItem().getType().equals(Material.ELYTRA) && event.getItem().getType().getMaxDurability() - ((Damageable) Objects.requireNonNull(event.getItem().getItemMeta())).getDamage() == 1) {
                 ReplaceHelper rt = new ReplaceHelper(event.getPlayer(), event.getItem(), itemSlot);
                 rt.swapTool();
             }

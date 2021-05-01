@@ -129,6 +129,56 @@ public class AutoReplaceTest {
         assertTrue(player.getInventory().contains(item), "Item was not found in inventory");
     }
 
+    /**
+     * Checks that non-enchanted elytras will be replaced with 1 durability left
+     */
+    @Test
+    public void replaceUnenchantedElytra() {
+        // create player and add one damaged and one undamaged item
+        Player player = server.addPlayer();
+        ItemStack item0 = getDamageable(Material.ELYTRA, 3, false);
+        ItemStack item1 = getDamageable(Material.ELYTRA, -1, false);
+        player.getInventory().setItem(38, item0);
+        item0 = player.getInventory().getItem(38);
+        player.getInventory().setItem(0, item1);
+        // execute event
+        executeItemDamageEvent(player, item0);
+        // check if elytra is kept with 2 durability left
+        assertEquals(2, getRestDurability(player.getInventory().getItem(38)), "elytra should not have been moved, but was");
+        assertEquals(2, Arrays.stream(player.getInventory().getContents()).filter(Objects::nonNull).
+                filter(items -> !AutoReplaceListener.isNullOrAir(items)).count(), "amount of items in inventory does not match expectations");
+        executeItemDamageEvent(player, player.getInventory().getItem(38));
+        // check if elytra gets replaced with 1 durability left
+        assertTrue(getRestDurability(player.getInventory().getItem(38)) > 5, "elytra should have been moved, but wasn't");
+        assertEquals(2, Arrays.stream(player.getInventory().getContents()).filter(Objects::nonNull).
+                filter(items -> !AutoReplaceListener.isNullOrAir(items)).count(), "amount of items in inventory does not match expectations");
+    }
+
+    /**
+     * Checks that enchanted elytras will be replaced with 1 durability left
+     */
+    @Test
+    public void replaceEnchantedElytra() {
+        // create player and add one damaged and one undamaged item
+        Player player = server.addPlayer();
+        ItemStack item0 = getDamageable(Material.ELYTRA, 3, true);
+        ItemStack item1 = getDamageable(Material.ELYTRA, -1, true);
+        player.getInventory().setItem(38, item0);
+        item0 = player.getInventory().getItem(38);
+        player.getInventory().setItem(0, item1);
+        // execute event
+        executeItemDamageEvent(player, item0);
+        // check if elytra is kept with 2 durability left
+        assertEquals(2, getRestDurability(player.getInventory().getItem(38)), "elytra should not have been moved, but was");
+        assertEquals(2, Arrays.stream(player.getInventory().getContents()).filter(Objects::nonNull).
+                filter(items -> !AutoReplaceListener.isNullOrAir(items)).count(), "amount of items in inventory does not match expectations");
+        executeItemDamageEvent(player, player.getInventory().getItem(38));
+        // check if elytra gets replaced with 1 durability left
+        assertTrue(getRestDurability(player.getInventory().getItem(38)) > 5, "elytra should have been moved, but wasn't");
+        assertEquals(2, Arrays.stream(player.getInventory().getContents()).filter(Objects::nonNull).
+                filter(items -> !AutoReplaceListener.isNullOrAir(items)).count(), "amount of items in inventory does not match expectations");
+    }
+
     @Test
     public void refillStack() {
         // create player and add single item
