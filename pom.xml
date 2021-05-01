@@ -6,7 +6,7 @@
 
     <groupId>com.github.timkalkus</groupId>
     <artifactId>AutoReplace</artifactId>
-    <version>0.2.6-snapshot</version>
+    <version>0.2.6</version>
 
     <repositories>
         <repository>
