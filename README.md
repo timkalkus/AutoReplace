@@ -6,7 +6,7 @@ AutoReplace is a small plugin to enhance the vanilla playing experience by autom
 
 <sup>_*it only saves enchanted tools so that they can be repaired and used again, without an enchantment the tools get replaced when they break_</sub>
 
-The plugin is currently in a **early development stage**. There are probably bugs, so **use at your own risk!** But in the case you encounter one: I would be very thankful for any bug report :)
+In the case that you encounter any bugs or have some ideas what features this plugin is missing: feel free to open a new [issues](https://github.com/timkalkus/AutoReplace/issues) :)
 
 # Installation Guide
 * Place `AutoReplace.jar` into your `/plugins` folder of your spigot server
