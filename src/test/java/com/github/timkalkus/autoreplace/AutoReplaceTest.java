@@ -24,9 +24,14 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
+import java.util.concurrent.ThreadLocalRandom;
 import java.util.logging.Level;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNotSame;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class AutoReplaceTest {
     private ServerMock server;
@@ -198,13 +203,120 @@ public class AutoReplaceTest {
         assertEquals(itemCount - 1, amountInInventory(player.getInventory(), Material.STONE));
     }
 
+    @Test
+    public void stressTest() {
+        int numberOfPlayers = 20;
+        server.setPlayers(numberOfPlayers);
+        for (int i = 0; i < numberOfPlayers; i++) {
+            executeItemDamageEvent(server.getPlayer(i), setInventoryForDamageEvent(server.getPlayer(i), i), false);
+        }
+        server.getScheduler().performOneTick();
+        for (int i = 0; i < numberOfPlayers; i++) {
+            testInventoryAfterDamageEvent(server.getPlayer(i), i);
+        }
+
+    }
+
+    public ItemStack setInventoryForDamageEvent(Player player, int i) {
+        Material type;
+        switch (i % 5) {
+            case 0: // unenchanted, should break and be replaced
+                type = Material.NETHERITE_PICKAXE;
+                player.getInventory().setItem(0, getDamageable(type, 1, false));
+                player.getInventory().setItem(ThreadLocalRandom.current().nextInt(1, 20), getDamageable(type, -1, false));
+                return player.getInventory().getItem(0);
+            case 1: // unenchanted, should stay
+                type = Material.NETHERITE_PICKAXE;
+                player.getInventory().setItem(0, getDamageable(type, 2, false));
+                player.getInventory().setItem(ThreadLocalRandom.current().nextInt(1, 20), getDamageable(type, -1, false));
+                return player.getInventory().getItem(0);
+            case 2: // enchanted, should be swapped
+                type = Material.NETHERITE_PICKAXE;
+                player.getInventory().setItem(0, getDamageable(type, 3, true));
+                player.getInventory().setItem(ThreadLocalRandom.current().nextInt(1, 20), getDamageable(type, -1, true));
+                return player.getInventory().getItem(0);
+            case 3: // enchanted, should be saved
+                type = Material.NETHERITE_PICKAXE;
+                player.getInventory().setItem(0, getDamageable(type, 3, true));
+                return player.getInventory().getItem(0);
+            case 4: // enchanted, should be swapped
+                type = Material.ELYTRA;
+                player.getInventory().setItem(38, getDamageable(type, 2, true));
+                player.getInventory().setItem(ThreadLocalRandom.current().nextInt(0, 20), getDamageable(type, -1, true));
+                return player.getInventory().getItem(38);
+            default: // enchanted, should not be swapped
+                type = Material.ELYTRA;
+                player.getInventory().setItem(38, getDamageable(type, 3, true));
+                player.getInventory().setItem(ThreadLocalRandom.current().nextInt(0, 20), getDamageable(type, -1, true));
+                return player.getInventory().getItem(38);
+        }
+    }
+
+    public void testInventoryAfterDamageEvent(Player player, int i) {
+        Material type;
+        ItemStack item;
+        switch (i % 5) {
+            case 0: // unenchanted, should break and be replaced
+                type = Material.NETHERITE_PICKAXE;
+                item = player.getInventory().getItem(0);
+                assertNotNull(item);
+                assertEquals(type, item.getType());
+                assertTrue(item.getEnchantments().isEmpty());
+                assertEquals(1, amountInInventory(player.getInventory(), type));
+                assertTrue(getRestDurability(item) > 5);
+                break;
+            case 1: // unenchanted, should stay
+                type = Material.NETHERITE_PICKAXE;
+                item = player.getInventory().getItem(0);
+                assertNotNull(item);
+                assertEquals(type, item.getType());
+                assertTrue(item.getEnchantments().isEmpty());
+                assertEquals(2, amountInInventory(player.getInventory(), type));
+                assertTrue(getRestDurability(item) < 5);
+                break;
+            case 2: // enchanted, should be swapped
+                type = Material.NETHERITE_PICKAXE;
+                item = player.getInventory().getItem(0);
+                assertNotNull(item);
+                assertEquals(type, item.getType());
+                assertFalse(item.getEnchantments().isEmpty());
+                assertEquals(2, amountInInventory(player.getInventory(), type));
+                assertTrue(getRestDurability(item) > 5);
+                break;
+            case 3: // enchanted, should be saved
+                type = Material.NETHERITE_PICKAXE;
+                item = player.getInventory().getItem(0);
+                assertTrue(AutoReplaceListener.isNullOrAir(item));
+                assertEquals(1, amountInInventory(player.getInventory(), type));
+                break;
+            case 4: // enchanted, should be swapped
+                type = Material.ELYTRA;
+                item = player.getInventory().getItem(38);
+                assertNotNull(item);
+                assertEquals(type, item.getType());
+                assertFalse(item.getEnchantments().isEmpty());
+                assertEquals(2, amountInInventory(player.getInventory(), type));
+                assertTrue(getRestDurability(item) > 5);
+                break;
+            default: // enchanted, should not be swapped
+                type = Material.ELYTRA;
+                item = player.getInventory().getItem(38);
+                assertNotNull(item);
+                assertEquals(type, item.getType());
+                assertFalse(item.getEnchantments().isEmpty());
+                assertEquals(2, amountInInventory(player.getInventory(), type));
+                assertTrue(getRestDurability(item) < 5);
+                break;
+        }
+    }
+
     /**
      * Imitates vanilla ItemDamageEvent behaviour by calling the event and increasing the damage if the event is not canceled
      *
      * @param player initiator of the event
      * @param item   item of the event, has to be damagable
      */
-    private void executeItemDamageEvent(Player player, ItemStack item) {
+    private void executeItemDamageEvent(Player player, ItemStack item, boolean doTick) {
         assertNotNull(player);
         assertNotNull(item);
         assertTrue(item.hasItemMeta(), "Item missing ItemMeta");
@@ -221,7 +333,13 @@ public class AutoReplaceTest {
             }
         }
         item.setItemMeta(meta);
-        server.getScheduler().performOneTick();
+        if (doTick) {
+            server.getScheduler().performOneTick();
+        }
+    }
+
+    private void executeItemDamageEvent(Player player, ItemStack item) {
+        executeItemDamageEvent(player, item, true);
     }
 
     /**
@@ -230,7 +348,7 @@ public class AutoReplaceTest {
      * @param player initiator of the event
      * @param item   item of the event
      */
-    private void executeItemUsedEvent(Player player, ItemStack item) {
+    private void executeItemUsedEvent(Player player, ItemStack item, boolean doTick) {
         assertNotNull(player);
         assertNotNull(item);
         PlayerInteractEvent event = new PlayerInteractEvent(player, Action.RIGHT_CLICK_BLOCK, item, null, BlockFace.EAST, null);
@@ -239,7 +357,13 @@ public class AutoReplaceTest {
             item.setAmount(item.getAmount() - 1);
             item.setType(Material.AIR);
         }
-        server.getScheduler().performOneTick();
+        if (doTick) {
+            server.getScheduler().performOneTick();
+        }
+    }
+
+    private void executeItemUsedEvent(Player player, ItemStack item) {
+        executeItemUsedEvent(player, item, true);
     }
 
     /**
